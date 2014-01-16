@@ -1,0 +1,38 @@
+<html>
+	<head>
+	   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script src="jquery.flot.js"></script>
+		<script src="SGR_functions.js"></script>
+		<script src="data_functions.js"></script>
+	</head>
+	<body>
+        <h1>TERM Curves</h1>
+		<div id="flot" style="height:600px;width:1000px;"></div>
+	</body>
+	<script>
+        //----------------------------------
+        //
+        //  TERM flots
+        //
+        //----------------------------------
+        
+		var plot_data = [];
+		for (var i in TERM('functions')) {
+            var series = {
+                data: [],
+                label: i.replace('_',' '),
+                clickable: true,
+                hoverable: true
+            };
+            for (var j=1; j<102; j++) {
+                series.data.push([j, TERM(i)(j)]);
+            }
+            plot_data.push(series);
+		}
+        plot_data.push({
+            data: [[0, 2.5], [101, 2.5]],
+            label: 'THRESHOLD'
+        });
+		$('#flot').plot(plot_data);
+	</script>
+</html>

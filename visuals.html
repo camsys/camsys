@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    body {
+        background-color: #EEEEC4;
+        text-align: center;
+        font-family: Century Gothic, Arial, Helvetica;
+    }
+    
+    #visuals div {
+        display: inline-block;
+    }
+        
+    .ui-tooltip-content {
+        font-family: Century Gothic, Arial, Helvetica;
+    }
+        
+    #sunburst {
+        text-align:center;
+        width: 35%;
+    }
+    
+    #sunburst path {
+      stroke: #fff;
+      fill-rule: evenodd;
+    }
+    
+    #sunburst path:hover {
+        opacity: 0.9;
+    }
+        
+    #sunburst text {
+        font-size: 1em;
+    }
+        
+    #area_bar {
+        margin: auto;
+        position: relative;
+        width: 55%;
+        font-size: 10px;
+    }
+    
+    #area_bar .axis path,
+    #area_bar .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+        
+    #area_bar rect:hover {
+        opacity: 0.8;
+    }
+    
+    
+    #area_bar form {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+    
+</style>
+<body>
+    <div id='title'></div>
+    <div id='visuals'>
+        <div id="area_bar"></div>
+        <div id="sunburst"></div>
+    </div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript" src="data_generator.js"></script>
+    <script type="text/javascript" src="SGR_functions.js"></script>
+    <script type="text/javascript" src="data_functions.js"></script>
+    <script type="text/javascript" src="CSV_loaders.js"></script>
+    <script src="sunburst.js"></script>
+    <script src="area_bar.js"></script>
+    <script>
+        var startYear = 2000,
+            currentYear = 2013,
+            endYear = 2020;
+        d3.csv('https://googledrive.com/host/0B4-zQkdH4geETGcwRGRELTctdVk/CAT_Fixed_Route_Vehicle_Inventory.csv', function(csv) {
+            csv = CSV(generate_assets(100), false);
+//            csv = CSV(csv, true);
+            area_bar(csv, true);
+            sunburst(csv);
+            $(document).tooltip({track:true});
+        });
+    </script>
+</body>
