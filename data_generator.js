@@ -45,6 +45,19 @@ var price_range = {
     utility_building: [500000,1000000]
 };
 
+var year_range = {
+    bus: [1990,2010],
+    light_rail: [1965,2005],
+    street: [10000,50000],
+    track: [1980,2005],
+    building_utilities: [1950,1980],
+    maintenance_building: [1940,1970],
+    overhead: [1960,2000],
+    parking: [1980,2000],
+    systems: [1960,2000],
+    utility_building: [1985,2005]
+};
+
 var total = 0;
 for (var i in asset_distribution) {
     total += asset_distribution[i];
@@ -69,7 +82,7 @@ function generate_assets(n) {
                 csv.push({
                     'Complet Vehicle ID # (Serial No.)': j.toUpperCase()+i,
                     Type: j,
-                    Year: random_integer([1970, 2013]),
+                    Year: random_integer(year_range[j]),
                     'purchase price': random_integer(price_range[j]),
                     volume: asset_volume[j]
                 });

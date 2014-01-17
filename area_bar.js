@@ -182,7 +182,7 @@ function area_bar(csv, historical) {
                 regression_points.push([d.x, d.y]);
             return x(d.x) + x.rangeBand() / 2;
         })
-        .y(function(d) { return height; })
+        .y(function(d) { return 0; })
         .interpolate('basis');
     
     var investment_path = svg.append("path")
@@ -194,7 +194,8 @@ function area_bar(csv, historical) {
         .attr("stroke-width", 3)
         .attr("stroke-linecap", "round");
     
-    investment_path.transition().duration(m * 20)
+    investment_path.transition().duration(m * 40)
+        .ease('elastic')
         .attr("d", investment_line);
     
     var trajectory = function(year) {
@@ -213,7 +214,12 @@ function area_bar(csv, historical) {
         .attr("fiill", "none")
         .attr("stroke", "green")
         .attr("stroke-width", 3)
-        .attr("stroke-linecap", "round");
+        .attr("stroke-linecap", "round")
+        .attr("transform", "scale(0)");
+    
+    trajectory_path.transition().duration(m * 40)
+        .ease('elastic')
+        .attr("transform", "");
     
     rect.transition()
         .delay(function(d, i) { return i * 10; })

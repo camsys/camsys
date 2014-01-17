@@ -34,6 +34,12 @@
             bad: 0.,
             backlog: 0.,
         };
+        var color = {
+            good: 'green',
+            marginal: 'yellow',
+            bad: 'orange',
+            backlog: 'red'
+        };
         
         for (var i in csv) {
             var asset = csv[i];
@@ -77,6 +83,14 @@
             assets_table.append(new_row);
         }
         
-        metric_div.html(JSON.stringify(gmbb));
+        var svg = '<svg width=800 height=20>';
+        var x=0;
+        for (var i in gmbb) {
+            svg += '<rect width='+gmbb[i]*800+' height=20 x='+x+' style="fill: '+color[i]+'"/>';
+            x += gmbb[i]*800;
+        }
+        svg += '</svg>';
+        metric_div.append(svg);
+        console.log(JSON.stringify(gmbb));
     </script>
 </html>
