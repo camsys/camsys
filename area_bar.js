@@ -169,15 +169,23 @@ function area_bar(csv, historical) {
         .attr("y", -7)
         .text(function(d) { return d; });
     
+    var regression_points = [];
+    
     var investment_line = d3.svg.line()
         .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
-        .y(function(d) { return ry(d.ry); });
+        .y(function(d) { return ry(d.ry); })
+        .interpolate('basis');
     
     var flat_line = d3.svg.line()
-        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
-        .y(function(d) { return height; });
+        .x(function(d) {
+            if (d.x < currentYear)
+                regression_points.push([d.x, d.y]);
+            return x(d.x) + x.rangeBand() / 2;
+        })
+        .y(function(d) { return height; })
+        .interpolate('basis');
     
-    svg.append("path")
+    var investment_path = svg.append("path")
         .datum(layers[0])
         .attr("class", "line")
         .attr("d", flat_line)
@@ -186,9 +194,26 @@ function area_bar(csv, historical) {
         .attr("stroke-width", 3)
         .attr("stroke-linecap", "round");
     
-    svg.select("path")
-        .transition().duration(m * 20)
+    investment_path.transition().duration(m * 20)
         .attr("d", investment_line);
+    
+    var trajectory = function(year) {
+        var ab = linear_regression(regression_points);
+        return ab[0]*year+ab[1];
+    };
+    
+    var trajectory_line = d3.svg.line()
+        .x(function(year) { return x(year) + x.rangeBand() / 2; })
+        .y(function(year) { return y(trajectory(year)); });
+    
+    var trajectory_path = svg.append("path")
+        .datum([startingYear, endYear])
+        .attr("class", "line")
+        .attr("d", trajectory_line)
+        .attr("fiill", "none")
+        .attr("stroke", "blue")
+        .attr("stroke-width", 3)
+        .attr("stroke-linecap", "round");
     
     rect.transition()
         .delay(function(d, i) { return i * 10; })
@@ -224,7 +249,7 @@ function area_bar(csv, historical) {
         .attr("transform", "rotate(90) translate(" + height/2 + "," + -(width+0.75*margin.right) + ")")
         .text("$ Investment Needed");
     
-        d3.selectAll("input").on("change", change);
+    d3.selectAll("input").on("change", change);
     
     function update_tooltip(d, i) {
         var tooltip_html = '<b>'+d.x+'</b>' + '<br>';
@@ -236,34 +261,34 @@ function area_bar(csv, historical) {
         $('.ui-tooltip-content').html(tooltip_html);
     }
     
-        function change() {
-          if (this.value === "grouped") transitionGrouped();
-          else transitionStacked();
-        }
+    function change() {
+        if (this.value === "grouped") transitionGrouped();
+        else transitionStacked();
+    }
+    
+    function transitionGrouped() {
+        y.domain([0, yGroupMax]);
         
-        function transitionGrouped() {
-          y.domain([0, yGroupMax]);
-        
-          rect.transition()
-              .duration(500)
-              .delay(function(d, i) { return i * 10; })
-              .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
-              .attr("width", x.rangeBand() / n)
+        rect.transition()
+            .duration(500)
+            .delay(function(d, i) { return i * 10; })
+                .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+                .attr("width", x.rangeBand() / n)
             .transition()
-              .attr("y", function(d) { return y(d.y); })
-              .attr("height", function(d) { return height - y(d.y); });
-        }
+                .attr("y", function(d) { return y(d.y); })
+                .attr("height", function(d) { return height - y(d.y); });
+    }
+    
+    function transitionStacked() {
+        y.domain([0, yStackMax]);
         
-        function transitionStacked() {
-          y.domain([0, yStackMax]);
-        
-          rect.transition()
-              .duration(500)
-              .delay(function(d, i) { return i * 10; })
-              .attr("y", function(d) { return y(d.y0 + d.y); })
-              .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+        rect.transition()
+            .duration(500)
+            .delay(function(d, i) { return i * 10; })
+                .attr("y", function(d) { return y(d.y0 + d.y); })
+                .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
             .transition()
-              .attr("x", function(d) { return x(d.x); })
-              .attr("width", x.rangeBand());
-        }
+                .attr("x", function(d) { return x(d.x); })
+                .attr("width", x.rangeBand());
+    }
 }

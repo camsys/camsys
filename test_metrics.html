@@ -41,7 +41,7 @@
             var year = asset.Year;
             
             var measure = parseInt(asset['purchase price']*Math.pow(1.03, this_year-year));
-//            measure = asset.volume/measure;
+            measure *= asset.volume;
             
             if (counts[type] === undefined)
                 counts[type] = {good:0,marginal:0,bad:0,backlog:0};
