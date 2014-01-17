@@ -63,15 +63,17 @@ function sunburst(csv) {
                +'<p>'+format_dollars(partitioned[0].value)+'</p>');
     
     sunburst_updater = function(year) {
-        root = data.format['flare'](function (asset) {
-            return SGR.replacement_cost(asset.Type, year-asset.Year, asset['purchase price']);
-        });
-        partitioned = partition.nodes(root);
-        path.data(partitioned)
-            .transition().duration(500)
-            .attrTween("d", yearTween);
-        legend.html('<h2>'+year+'</h2>'
-               +'<p>'+format_dollars(partitioned[0].value)+'</p>');
+        if (year >= currentYear) {
+            root = data.format['flare'](function (asset) {
+                return SGR.replacement_cost(asset.Type, year-asset.Year, asset['purchase price']);
+            });
+            partitioned = partition.nodes(root);
+            path.data(partitioned)
+                .transition().duration(500)
+                .attrTween("d", yearTween);
+            legend.html('<h2>'+year+'</h2>'
+                   +'<p>'+format_dollars(partitioned[0].value)+'</p>');
+        }
     }
     
     d3.select('body').style("opacity", 0);
