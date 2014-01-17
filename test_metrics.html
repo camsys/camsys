@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script type="text/javascript" src="data_generator.js"></script>
+        <script type="text/javascript" src="SGR_functions.js"></script>
+        <script type="text/javascript" src="data_functions.js"></script>
+        <script type="text/javascript" src="CSV_loaders.js"></script>
+    </head>
+    <body>
+        <div id="assets">
+            <table>
+                <tr>
+                    <td>type</td>
+                    <td>good</td>
+                    <td>marginal</td>
+                    <td>bad</td>
+                    <td>backlog</td>
+                </tr>
+            </table>
+        </div>
+        <div id="metric"></div>
+    </body>
+    <script>
+        var assets_div = $('#assets');
+        var metric_div = $('#metric');
+        
+        var this_year = 2010;
+        var csv = generate_assets(100);
+        
+        var counts = {};
+        var gmbb = {
+            good: 0.,
+            marginal: 0.,
+            bad: 0.,
+            backlog: 0.,
+        };
+        
+        for (var i in csv) {
+            var asset = csv[i];
+            var type = asset.Type;
+            var year = asset.Year;
+            
+            var measure = parseInt(asset['purchase price']*Math.pow(1.03, this_year-year));
+//            measure = asset.volume/measure;
+            
+            if (counts[type] === undefined)
+                counts[type] = {good:0,marginal:0,bad:0,backlog:0};
+            var replacement_year = year + projected_lifespan(type);
+            if (replacement_year < this_year) {
+                counts[type].backlog += 1;
+                gmbb.backlog += measure;
+            }
+            else if (replacement_year === this_year) {
+                counts[type].bad += 1;
+                gmbb.bad += measure;
+            }
+            else if (replacement_year === this_year+1) {
+                counts[type].marginal += 1;
+                gmbb.marginal += measure;
+            }
+            else {
+                counts[type].good += 1;
+                gmbb.good += measure;
+            }
+        }
+        var total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
+        for (var i in gmbb) gmbb[i] /= total;
+        
+        var assets_table = assets_div.find('table');
+        var sorted_keys = Object.keys(counts).sort();
+        for (var s in sorted_keys) {
+            var i = sorted_keys[s];
+            var new_row = $('<tr><td>'+i+'</td></tr>');
+            for (var j in counts[i]) {
+                new_row.append('<td>'+counts[i][j]+'</td>');
+            }
+            assets_table.append(new_row);
+        }
+        
+        metric_div.html(JSON.stringify(gmbb));
+    </script>
+</html>

@@ -147,8 +147,13 @@ function area_bar(csv, historical) {
         .attr("y", height)
         .attr("width", x.rangeBand())
         .attr("height", 0)
+        .attr("opacity", function(d) { return d.x < currentYear ? 0.5 : 1; })
         .on("click", function(d) { sunburst_updater(d.x); })
-        .on('mouseenter', update_tooltip);
+        .on('mouseenter', update_tooltip)
+        .on('mouseover', function(d) {
+            if (d3.event.shiftKey)
+                sunburst_updater(d.x);
+        });
     
     var legend = svg.selectAll(".legend")
         .data(d3.keys(index_mapping))

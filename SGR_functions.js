@@ -84,8 +84,11 @@ function class_of_asset(type) {
 
 function projected_lifespan(type) {
     var f = function (years) { return TERM(type)(years) - 2.5; };
-    var x1 = 0.,
-        x2 = 100.,
+    var x2 = 1.;
+    while (f(x2) >= 0) {
+        x2 += 1
+    }
+    var x1 = x2 - 1,
         x3 = x2 - f(x2) * (x2 - x1) / (f(x2) - f(x1)),
         e = Math.abs(x3 - x2);
     while (e > 0.001) {
