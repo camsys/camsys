@@ -255,6 +255,20 @@ function area_bar(csv, historical) {
         .attr("transform", "rotate(90) translate(" + height/2 + "," + -(width+0.75*margin.right) + ")")
         .text("$ Investment Needed");
     
+    var path_legend = svg.selectAll('.path_legend')
+        .data([['projection','green'],['investment','black']])
+        .enter().append('g')
+        .attr('transform', 'translate('+(width-160)+','+(height+margin.bottom)+')');
+    path_legend.append('rect')
+        .attr('x', function(d, i) { return i * 80; })
+        .attr('height', 5)
+        .attr('width', 15)
+        .attr('fill', function(d) { return d[1]; });
+    path_legend.append('text')
+        .attr('x', function(d, i) { return i * 80 + 20; })
+        .attr('y', 5)
+        .text(function(d) { return d[0]; });
+    
     d3.selectAll("input").on("change", change);
     
     function update_tooltip(d, i) {
