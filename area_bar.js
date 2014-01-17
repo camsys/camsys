@@ -211,7 +211,7 @@ function area_bar(csv, historical) {
         .attr("class", "line")
         .attr("d", trajectory_line)
         .attr("fiill", "none")
-        .attr("stroke", "blue")
+        .attr("stroke", "green")
         .attr("stroke-width", 3)
         .attr("stroke-linecap", "round");
     

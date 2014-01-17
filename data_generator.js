@@ -90,7 +90,7 @@ function generate_history(start, end) {
             marginal: marginal,
             bad: bad,
             backlog: backlog,
-            investment: 80000000*good
+            investment: 80000000*(1.2-good)
         };
     }
     return yearly_data;
