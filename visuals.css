@@ -44,7 +44,7 @@ body {
     shape-rendering: crispEdges;
 }
     
-#area_bar rect:hover {
+#area_bar .layer rect:hover {
     opacity: 0.7;
 }
 

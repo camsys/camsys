@@ -14,7 +14,7 @@
         <script src="sunburst.js"></script>
         <script src="area_bar.js"></script>
     </head>
-    <body> 
+    <body>
         <div id='title'></div>
         <div id='visuals'>
             <div id="area_bar"></div>
@@ -26,23 +26,30 @@
                 <li><b>Left: State of Good Repair.</b></li>
                 <li>CURRENT METRIC: adjusted price * volume of customers</li>
                 <li>Grayed out bars are past years, on which the trendline is based.</li>
-                <li>Marginal = needs to be replaced next year; bad = needs to be replaced this year.</li>
-                <li>Black line in past years is actual amount invested; current year and beyond is projected investment needed.</li>
+                <li>Marginal = needs to be replaced next year;
+                    bad = needs to be replaced this year.</li>
+                <li>Black line in past years is actual amount invested;
+                    current year and beyond is projected investment needed.</li>
                 <li>Green line is a linear regression on the % of GOOD assets.</li>
-                <li><b>Right: Investment breakdown.</b> (Only for projected years, not historical.)</li>
+                <li><b>Right: Investment breakdown.</b>
+                    (Only for projected years, not historical.)</li>
                 <li>Click or shift-mouseover on a year on the left to get the breakdown.</li>
             </ul>
         </div>
         <script>
             var startYear = 1990,
                 currentYear = 2013,
-                endYear = 2020;
+                endYear = 2020,
+                threshold = 0.8,
+                weight_metric = function (asset, year) {
+                    return asset.price * Math.pow(1.03, year-asset.year) * asset.volume;
+                };
 //            d3.csv('https://googledrive.com/host/0B4-zQkdH4geETGcwRGRELTctdVk/CAT_Fixed_Route_Vehicle_Inventory.csv', function(csv) {
                 var csv = CSV(generate_assets(100), false);
 //                csv = CSV(csv, true);
                 area_bar(csv, true);
                 sunburst(csv);
-                $(document).tooltip({track:true});
+                $('#visuals').tooltip({track:true});
 //            });
         </script>
     </body>

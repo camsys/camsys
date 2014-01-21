@@ -67,12 +67,12 @@ var classes_data = {
     light_rail: 'vehicle',
     street: 'infrastructure',
     track: 'infrastructure',
-    building_utilities: 'systems/utilities',
-    maintenance_building: 'building',
+    building_utilities: 'infrastructure',
+    maintenance_building: 'infrastructure',
     overhead: 'infrastructure',
     parking: 'infrastructure',
-    systems: 'systems/utilities',
-    utility_building: 'building'
+    systems: 'infrastructure',
+    utility_building: 'infrastructure'
 };
 
 function class_of_asset(type) {

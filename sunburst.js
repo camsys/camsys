@@ -37,7 +37,7 @@ function sunburst(csv) {
     var data = csv;
         
     var root = data.format.flare(function (asset) {
-        return SGR.replacement_cost(asset.Type, currentYear-asset.Year, asset['purchase price']);
+        return SGR.replacement_cost(asset.type, currentYear-asset.year, asset.price);
     });
     
     var partitioned = partition.nodes(root);
@@ -56,7 +56,7 @@ function sunburst(csv) {
         })
         .style("fill", function(d) { return color(d.name); })
         .on("click", click)
-        .on("mouseenter", update_tooltip);
+        .on("mousemove", update_tooltip);
     
     var legend = $('#title');
     legend.html('<h2>'+currentYear+'</h2>'
@@ -65,7 +65,7 @@ function sunburst(csv) {
     sunburst_updater = function(year) {
         if (year >= currentYear) {
             root = data.format['flare'](function (asset) {
-                return SGR.replacement_cost(asset.Type, year-asset.Year, asset['purchase price']);
+                return SGR.replacement_cost(asset.type, year-asset.year, asset.price);
             });
             partitioned = partition.nodes(root);
             path.data(partitioned)
@@ -103,8 +103,6 @@ function sunburst(csv) {
         d3.select(".ui-tooltip-content")
             .html('<b>'+d.name+'</b><br>'+format_dollars(d.value));
     }
-    
-    d3.select(self.frameElement).style("height", height + "px");
     
     // Interpolate the scales!
     function arcTween(d) {

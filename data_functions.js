@@ -12,46 +12,6 @@ function format_dollars(number) {
     return '$'+amount;
 }
 
-function csv_to_json(csv, metric) {
-    var json_data = {
-        System: {
-            name: 'System',
-            value: 0,
-            children: {
-                BUS: {
-                    name: 'BUS',
-                    value: 0,
-                    children: {}
-                },
-                'LIGHT RAIL': {
-                    name: 'LIGHT RAIL',
-                    value: 0,
-                    children: {}
-                },
-                STREET: {
-                    name: 'STREET',
-                    value: 0,
-                    children: {}
-                }
-            }
-        }
-    };
-    
-    for (var i in csv) {
-        var asset = csv[i];
-        var size = metric(asset);
-        json_data.System.children[asset.Type].children[asset['Complet Vehicle ID # (Serial No.)']] = {
-            name: asset['Complet Vehicle ID # (Serial No.)'],
-            size: size,
-            value: size,
-            year: asset.Year
-        };
-        json_data.System.value += size;
-        json_data.System.children[asset.Type].value += size;
-    }
-    return json_data;
-}
-
 function linear_regression(points) {
     var sumx=0, sumy=0, sumx2=0, sumy2=0, sumxy=0, n=points.length;
     for (var i in points) {

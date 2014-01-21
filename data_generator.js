@@ -1,11 +1,3 @@
-/**
-generates:
-- VEHICLES
-- BUILDINGS
-- INFRASTRUCTURE
-- SYSTEMS/UTILITIES
-**/
-
 var asset_distribution = {
     bus: 70,
     light_rail: 40,
@@ -19,7 +11,7 @@ var asset_distribution = {
     utility_building: 5
 };
 
-var asset_volume = { // volume of people transported per day
+var asset_volume = {
     bus: 1000,
     light_rail: 2000,
     street: 500,
@@ -47,7 +39,7 @@ var price_range = {
 
 var year_range = {
     bus: [1990,2010],
-    light_rail: [1965,2005],
+    light_rail: [1975,2005],
     street: [10000,50000],
     track: [1980,2005],
     building_utilities: [1950,1980],
@@ -80,10 +72,10 @@ function generate_assets(n) {
         for (var j in asset_distribution) {
             if (r >= asset_distribution[j][0] & r < asset_distribution[j][1])
                 csv.push({
-                    'Complet Vehicle ID # (Serial No.)': j.toUpperCase()+i,
-                    Type: j,
-                    Year: random_integer(year_range[j]),
-                    'purchase price': random_integer(price_range[j]),
+                    serial: j.toUpperCase()+i,
+                    type: j,
+                    year: random_integer(year_range[j]),
+                    price: random_integer(price_range[j]),
                     volume: asset_volume[j]
                 });
         }

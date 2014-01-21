@@ -9,6 +9,7 @@
             <table>
                 <tr>
                     <td>type</td>
+                    <td>price</td>
                     <td>good</td>
                     <td>marginal</td>
                     <td>bad</td>
@@ -40,8 +41,8 @@
         for (var i in cumulative_data) {
             var new_row = $('<tr><td>'+i+'</td></tr>');
             for (var j in cumulative_data[i]) {
+                new_row.append('<td><input class="gmbb" data-type="'+i+'" data-condition="'+j+'" value="'+cumulative_data[i][j]+'"></td>');
                 if (j !== 'price') {
-                    new_row.append('<td>'+cumulative_data[i][j]+'</td>');
                     var measure = cumulative_data[i].price * asset_volume[i];
                     gmbb[j] += measure * cumulative_data[i][j];
                 }
@@ -60,5 +61,40 @@
         }
         svg += '</svg>';
         metric_div.html(svg);
+        
+        $('.gmbb').on('keyup', function(e) {
+            if (e.which === 13) {
+                $('.gmbb').each(function() {
+                    var type = $(this).attr('data-type');
+                    var condition = $(this).attr('data-condition');
+                    var value = parseInt($(this).val());
+                    cumulative_data[type][condition] = value;
+                    gmbb = {
+                        good: 0.,
+                        marginal: 0.,
+                        bad: 0.,
+                        backlog: 0.,
+                    };
+                    for (var i in cumulative_data) {
+                        for (var j in cumulative_data[i]) {
+                            if (j !== 'price') {
+                                var measure = cumulative_data[i].price * asset_volume[i];
+                                gmbb[j] += measure * cumulative_data[i][j];
+                            }
+                        }
+                    }
+                     total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
+                    for (var i in gmbb) gmbb[i] /= total;
+                    svg = '<svg width=800 height=20>';
+                    x=0;
+                    for (var i in gmbb) {
+                        svg += '<rect width='+gmbb[i]*800+' height=20 x='+x+' style="fill: '+color[i]+'"/>';
+                        x += gmbb[i]*800;
+                    }
+                    svg += '</svg>';
+                    metric_div.html(svg);
+                });
+            }
+        });
     </script>
 </html>

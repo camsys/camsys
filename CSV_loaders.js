@@ -1,23 +1,4 @@
-var CSV = function (csv, add_more) {
-    
-    if (add_more) {
-        for (var i=0; i<18; i++) {
-            csv.push({
-                Type: 'LIGHT RAIL',
-                'Complet Vehicle ID # (Serial No.)': 'MADEUPLR'+i,
-                Year: i<5?1981:(i<7?1948:(i<13?2004:1997)),
-                'purchase price': i<5?972000:(i<7?300000:(i<13?13000000:9000000))
-            });
-        }
-        for (var i=0; i<3; i++) {
-            csv.push({
-                Type: 'STREET',
-                'Complet Vehicle ID # (Serial No.)': 'MADEUPST'+i,
-                Year: 1995,
-                'purchase price': 5000000
-            });
-        }
-    }
+var CSV = function (csv) {
     
     var format = {
         flare: function (metric, trim) {
@@ -28,9 +9,9 @@ var CSV = function (csv, add_more) {
             for (var i in csv) {
                 var asset = csv[i];
                 var size = metric(asset);
-                var name = asset['Complet Vehicle ID # (Serial No.)'];
-                var type = asset.Type;
-                var year = asset.Year;
+                var name = asset.serial;
+                var type = asset.type;
+                var year = asset.year;
                 var clas = class_of_asset(type);
                 if (!trim | size > 0) {
                     // add the class
@@ -77,9 +58,9 @@ var CSV = function (csv, add_more) {
     function total_investment(year) {
         var total = 0.;
         for (var i in csv) {
-            total += SGR.replacement_cost(csv[i].Type,
-                                          year-parseInt(csv[i].Year),
-                                          csv[i]['purchase price']);
+            total += SGR.replacement_cost(csv[i].type,
+                                          year-parseInt(csv[i].year),
+                                          csv[i].price);
         }
         return total;
     }
@@ -94,9 +75,8 @@ var CSV = function (csv, add_more) {
         
         for (var i in csv) {
             var asset = csv[i];
-            var replacement_year = projected_lifespan(asset.Type) + parseInt(asset.Year);
-            var measure = parseInt(asset['purchase price']*Math.pow(1.03, year-parseInt(asset.Year)));
-            measure *= asset.volume;
+            var replacement_year = projected_lifespan(asset.type) + parseInt(asset.year);
+            var measure = weight_metric(asset, year);
             if (replacement_year === year)
                 gmbb.bad += measure;
             else if (replacement_year < year)

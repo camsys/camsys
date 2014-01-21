@@ -147,7 +147,9 @@ function area_bar(csv, historical) {
         .attr("y", height)
         .attr("width", x.rangeBand())
         .attr("height", 0)
-        .attr("opacity", function(d) { return d.x < currentYear ? 0.7 : 1; })
+        .attr("fill", function(d) {
+            return d.x < currentYear ? d3.rgb(this.parentNode.style.fill).darker() : '';
+        })
         .on("click", function(d) { sunburst_updater(d.x); })
         .on('mouseenter', update_tooltip)
         .on('mouseover', function(d) {
@@ -171,55 +173,83 @@ function area_bar(csv, historical) {
     
     var regression_points = [];
     
-    var investment_line = d3.svg.line()
-        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
-        .y(function(d) { return ry(d.ry); })
-        .interpolate('basis');
-    
-    var flat_line = d3.svg.line()
-        .x(function(d) {
-            if (d.x < currentYear)
-                regression_points.push([d.x, d.y]);
-            return x(d.x) + x.rangeBand() / 2;
-        })
-        .y(function(d) { return 0; })
-        .interpolate('basis');
-    
-    var investment_path = svg.append("path")
-        .datum(layers[0])
-        .attr("class", "line")
-        .attr("d", flat_line)
-        .attr("fill", "none")
-        .attr("stroke", "black")
-        .attr("stroke-width", 3)
-        .attr("stroke-linecap", "round");
-    
-    investment_path.transition().duration(m * 40)
-        .ease('elastic')
-        .attr("d", investment_line);
+    for (var i in layers[0]) {
+        if (layers[0][i].x < currentYear)
+            regression_points.push([layers[0][i].x, layers[0][i].y]);
+    }
     
     var trajectory = function(year) {
         var ab = linear_regression(regression_points);
         return ab[0]*year+ab[1];
     };
     
+    var flat_line = d3.svg.line()
+        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
+        .y(function(d) { return height; })
+        .interpolate('basis');
+    
+    var threshold_line = d3.svg.line()
+        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
+        .y(function() { return y(80); });
+    
+    var investment_line = d3.svg.line()
+        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
+        .y(function(d) { return ry(d.ry); })
+        .interpolate('basis');
+    
     var trajectory_line = d3.svg.line()
-        .x(function(year) { return x(year) + x.rangeBand() / 2; })
-        .y(function(year) { return y(trajectory(year)); });
+        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
+        .y(function(d) { return y(trajectory(d.x)); });
     
-    var trajectory_path = svg.append("path")
-        .datum([startingYear, endYear])
+    var threshold_path = svg.append("path")
+        .datum([{x: startingYear}, {x: endYear}])
         .attr("class", "line")
-        .attr("d", trajectory_line)
-        .attr("fiill", "none")
-        .attr("stroke", "green")
-        .attr("stroke-width", 3)
-        .attr("stroke-linecap", "round")
-        .attr("transform", "scale(0)");
+        .attr("d", flat_line)
+        .attr("stroke", "lightgray")
+        .attr("stroke-width", 1)
+        .attr("fill", "none");
     
-    trajectory_path.transition().duration(m * 40)
-        .ease('elastic')
-        .attr("transform", "");
+    var investment_path = svg.append("g")
+        .datum(layers[0])
+        .attr("stroke-linecap", "round")
+        .attr("fill", "none");
+    investment_path.append("path")
+        .attr("class", "line")
+        .attr("d", flat_line)
+        .attr("stroke", "black")
+        .attr("stroke-width", 5);
+    investment_path.append("path")
+        .attr("class", "line")
+        .attr("d", flat_line)
+        .attr("stroke", "gray")
+        .attr("stroke-width", 3);
+    
+    var trajectory_path = svg.append("g")
+        .datum([{x: startingYear}, {x: endYear}])
+        .attr("fill", "none")
+        .attr("stroke-linecap", "round");
+    trajectory_path.append("path")
+        .attr("class", "line")
+        .attr("d", flat_line)
+        .attr("stroke", "green")
+        .attr("stroke-width", 5);
+    trajectory_path.append("path")
+        .attr("class", "line")
+        .attr("d", flat_line)
+        .attr("stroke", "lightgreen")
+        .attr("stroke-width", 3);
+    
+    threshold_path.transition()
+        .duration(m * 20)
+        .attr("d", threshold_line);
+    
+    investment_path.selectAll("path")
+        .transition().duration(m * 20)
+        .attr("d", investment_line);
+    
+    trajectory_path.selectAll("path")
+        .transition().duration(m * 20)
+        .attr("d", trajectory_line);
     
     rect.transition()
         .delay(function(d, i) { return i * 10; })
@@ -256,7 +286,7 @@ function area_bar(csv, historical) {
         .text("$ Investment Needed");
     
     var path_legend = svg.selectAll('.path_legend')
-        .data([['projection','green'],['investment','black']])
+        .data([['projection','green','lightgreen'],['investment','black','gray']])
         .enter().append('g')
         .attr('transform', 'translate('+(width-160)+','+(height+margin.bottom)+')');
     path_legend.append('rect')
@@ -264,6 +294,12 @@ function area_bar(csv, historical) {
         .attr('height', 5)
         .attr('width', 15)
         .attr('fill', function(d) { return d[1]; });
+    path_legend.append('rect')
+        .attr('x', function(d, i) { return i * 80 + 2; })
+        .attr('y', 1)
+        .attr('height', 3)
+        .attr('width', 11)
+        .attr('fill', function(d) { return d[2]; });
     path_legend.append('text')
         .attr('x', function(d, i) { return i * 80 + 20; })
         .attr('y', 5)
