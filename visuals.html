@@ -20,6 +20,19 @@
             <div id="area_bar"></div>
             <div id="sunburst"></div>
         </div>
+        <div id='notes'>
+            <h3>Notes:</h3>
+            <ul style="list-style: none;">
+                <li><b>Left: State of Good Repair.</b></li>
+                <li>CURRENT METRIC: adjusted price * volume of customers</li>
+                <li>Grayed out bars are past years, on which the trendline is based.</li>
+                <li>Marginal = needs to be replaced next year; bad = needs to be replaced this year.</li>
+                <li>Black line in past years is actual amount invested; current year and beyond is projected investment needed.</li>
+                <li>Green line is a linear regression on the % of GOOD assets.</li>
+                <li><b>Right: Investment breakdown.</b> (Only for projected years, not historical.)</li>
+                <li>Click or shift-mouseover on a year on the left to get the breakdown.</li>
+            </ul>
+        </div>
         <script>
             var startYear = 1990,
                 currentYear = 2013,

@@ -78,7 +78,7 @@ function sunburst(csv) {
     
     d3.select('body').style("opacity", 0);
     d3.select('body').transition()
-        .duration(500)
+        .duration(750)
         .style("opacity", 1);
     
     function yearTween(a) {

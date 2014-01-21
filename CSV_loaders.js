@@ -96,6 +96,7 @@ var CSV = function (csv, add_more) {
             var asset = csv[i];
             var replacement_year = projected_lifespan(asset.Type) + parseInt(asset.Year);
             var measure = parseInt(asset['purchase price']*Math.pow(1.03, year-parseInt(asset.Year)));
+            measure *= asset.volume;
             if (replacement_year === year)
                 gmbb.bad += measure;
             else if (replacement_year < year)
@@ -139,6 +140,7 @@ var CSV = function (csv, add_more) {
     };
     
     return {
+        csv: $.extend(true,{},csv),
         format: format,
         system_metric: system_metric
     };
