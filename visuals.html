@@ -40,16 +40,35 @@
             var startYear = 1990,
                 currentYear = 2013,
                 endYear = 2020,
-                threshold = 0.8,
+                threshold = 80,
                 weight_metric = function (asset, year) {
                     return asset.price * Math.pow(1.03, year-asset.year) * asset.volume;
+                },
+                color_scheme = {
+                    total: '#393b79',
+                    infrastructure: '#843c39',
+                    building_utilities: '#de9ed6',
+                    maintenance_building: '#ce6dbd',
+                    overhead: '#a55194',
+                    parking: '#7b4173',
+                    street: '#ad494a',
+                    systems: '#d6616b',
+                    track: '#e7969c',
+                    utility_building: '#7b4173',
+                    vehicle: '#636363',
+                    bus: '#9e9ac8',
+                    light_rail: '#969696'
                 };
 //            d3.csv('https://googledrive.com/host/0B4-zQkdH4geETGcwRGRELTctdVk/CAT_Fixed_Route_Vehicle_Inventory.csv', function(csv) {
                 var csv = CSV(generate_assets(100), false);
 //                csv = CSV(csv, true);
                 area_bar(csv, true);
                 sunburst(csv);
-                $('#visuals').tooltip({track:true});
+                $('#visuals').tooltip({
+                    track: true,
+                    show: false,
+                    hide: false
+                });
 //            });
         </script>
     </body>

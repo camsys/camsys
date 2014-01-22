@@ -1,16 +1,36 @@
+// http://bl.ocks.org/mbostock/3943967
 function area_bar(csv, historical) {
+    
+//    // add group/stack radio buttons
+    var container = $('#area_bar');
+//        container.append('\
+//            <form>\
+//              <label><input type="radio" name="mode" value="grouped"> Grouped</label>\
+//              <label><input type="radio" name="mode" value="stacked" checked> Stacked</label>\
+//            </form>');
+//    
+//    d3.selectAll("input").on("change", change);
+    
+    /************************
+        DATA SETUP
+    ************************/
+    
+    // set the starting x value
     var startingYear = currentYear;
     if (historical)
         startingYear = startYear;
     
+    // get projected data for future years
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
     var yearly_gmbb_data = csv.system_metric.gmbb(years);
     var yearly_total_investment = csv.system_metric["total investment"](years);
     
+    // generate historical data
     var historical_data = generate_history(startYear, currentYear-1);
     
+    // merge the two datasets
     var data = [];
     var index_mapping = {};
     for (var i in yearly_gmbb_data) {
@@ -42,14 +62,7 @@ function area_bar(csv, historical) {
         }
     }
     
-    // http://bl.ocks.org/mbostock/3943967
-    var container = $('#area_bar');
-        container.append('\
-            <form>\
-              <label><input type="radio" name="mode" value="grouped"> Grouped</label>\
-              <label><input type="radio" name="mode" value="stacked" checked> Stacked</label>\
-            </form>');
-    
+    // translate data into stacked-bar layers format
     var layer_data = [];
     for (var i in data) {
         layer_data.push([]);
@@ -61,6 +74,10 @@ function area_bar(csv, historical) {
             });
         }
     }
+    
+    /************************
+        D3 SETUP
+    ************************/
     
     var n = 4, // number of layers
         m = endYear-startingYear, // number of samples per layer
@@ -127,10 +144,14 @@ function area_bar(csv, historical) {
         })
         .orient("right");
     
+    /************************
+        PRIMARY SVG SETUP
+    ************************/
+    
     var svg = d3.select("#area_bar").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + 2*margin.bottom)
-        .attr("title", " ")
+        .attr("title", "...")
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
@@ -143,33 +164,126 @@ function area_bar(csv, historical) {
     var rect = layer.selectAll("rect")
         .data(function(d) { return d; })
       .enter().append("rect")
+        .attr('class', function(d, i) { return 'rect'+i; })
         .attr("x", function(d) { return x(d.x); })
         .attr("y", height)
         .attr("width", x.rangeBand())
         .attr("height", 0)
-        .attr("fill", function(d) {
-            return d.x < currentYear ? d3.rgb(this.parentNode.style.fill).darker() : '';
-        })
-        .on("click", function(d) { sunburst_updater(d.x); })
-        .on('mouseenter', update_tooltip)
-        .on('mouseover', function(d) {
+        .on("click", update_year)
+        .on('mouseover', function(d, i) {
             if (d3.event.shiftKey)
-                sunburst_updater(d.x);
+                update_year(d);
+            update_tooltip(d, i);
+            layer.selectAll('.rect'+i).style('opacity', 0.7);
+        })
+        .on('mouseleave', function(d, i) {
+            layer.selectAll('.rect'+i)
+                .transition().ease('linear')
+                .style('opacity', 1);
         });
     
-    var legend = svg.selectAll(".legend")
+    var threshold_mask = svg.append("rect")
+        .attr("x", x(startingYear))
+        .attr("y", y(100))
+        .attr("width", x(endYear) + x.rangeBand() - x(startingYear))
+        .attr("height", y(threshold) - y(100))
+        .attr("fill", "white")
+        .style("opacity", 0.5)
+        .style("pointer-events", "none");
+    
+    /************************
+        AXES AND LABELS
+    ************************/
+    
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+    
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+    
+    svg.append("g")
+        .attr("class", "ry axis")
+        .attr("transform", "translate(" + width + ",0)")
+        .call(ryAxis);
+    
+    svg.append("text")
+        .style("text-anchor", "middle")
+        .attr("transform", "translate(" + width/2 + "," + (height+1.5*margin.bottom) + ")")
+        .text("Year");
+    
+    svg.append("text")
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90) translate(" + -height/2 + "," + -0.75*margin.left + ")")
+        .text("% Assets");
+    
+    svg.append("text")
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(90) translate(" + height/2 + "," + -(width+0.75*margin.right) + ")")
+        .text("$ Investment Needed");
+    
+    /************************
+        LEGENDS SETUP
+    ************************/
+    
+    var bar_legend = svg.selectAll(".legend")
         .data(d3.keys(index_mapping))
         .enter().append("g");
-    legend.append("rect")
+    bar_legend.append("rect")
         .attr("x", function(d, i) { return 80 * i; })
         .attr("y", -15)
         .attr('width', 10)
         .attr('height', 10)
         .style('fill', function(d) { return legendColors(d); });
-    legend.append("text")
+    bar_legend.append("text")
         .attr("x", function(d, i) { return 15 + 80 * i; })
         .attr("y", -7)
         .text(function(d) { return d; });
+    
+    var path_legend = svg.selectAll('.path_legend')
+        .data([['projection','green','lightgreen'],['investment','black','gray']])
+        .enter().append('g')
+        .attr('transform', 'translate('+(width-160)+',-12)');
+    path_legend.append('rect')
+        .attr('x', function(d, i) { return i * 80; })
+        .attr('height', 5)
+        .attr('width', 15)
+        .attr('fill', function(d) { return d[1]; });
+    path_legend.append('rect')
+        .attr('x', function(d, i) { return i * 80 + 2; })
+        .attr('y', 1)
+        .attr('height', 3)
+        .attr('width', 11)
+        .attr('fill', function(d) { return d[2]; });
+    path_legend.append('text')
+        .attr('x', function(d, i) { return i * 80 + 20; })
+        .attr('y', 5)
+        .text(function(d) { return d[0]; });
+    
+    /************************
+        INDICATOR SETUP
+    ************************/
+    
+    var polygon = function(d) {
+        return d.map(function(d) {
+            return [d.x, d.y].join(",");
+        }).join(" ");
+    };
+    
+    var indicator = svg.append("polygon")
+        .datum([{x: 0, y: -x.rangeBand()/2},
+                {x: -x.rangeBand()/2, y: 0},
+                {x: x.rangeBand()/2, y: 0}])
+        .attr('class', 'indicator')
+        .attr("points", polygon)
+        .attr("transform", "translate("+(x(currentYear)+x.rangeBand()/2)+","+height+")")
+        .attr("fill", "black");
+    
+    /************************
+        PATHS SETUP
+    ************************/
     
     var regression_points = [];
     
@@ -188,9 +302,9 @@ function area_bar(csv, historical) {
         .y(function(d) { return height; })
         .interpolate('basis');
     
-    var threshold_line = d3.svg.line()
-        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
-        .y(function() { return y(80); });
+    var division_line = d3.svg.line()
+        .x(function(d) { return x(currentYear) - 1; })
+        .y(function(d) { return y(d.x); });
     
     var investment_line = d3.svg.line()
         .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
@@ -201,12 +315,12 @@ function area_bar(csv, historical) {
         .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
         .y(function(d) { return y(trajectory(d.x)); });
     
-    var threshold_path = svg.append("path")
-        .datum([{x: startingYear}, {x: endYear}])
+    var division_path = svg.append("path")
+        .datum([{x: 0}, {x: 100}])
         .attr("class", "line")
-        .attr("d", flat_line)
-        .attr("stroke", "lightgray")
-        .attr("stroke-width", 1)
+        .attr("d", division_line)
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
         .attr("fill", "none");
     
     var investment_path = svg.append("g")
@@ -239,9 +353,9 @@ function area_bar(csv, historical) {
         .attr("stroke", "lightgreen")
         .attr("stroke-width", 3);
     
-    threshold_path.transition()
-        .duration(m * 20)
-        .attr("d", threshold_line);
+    /************************
+        INITIAL TRANSITIONS
+    ************************/
     
     investment_path.selectAll("path")
         .transition().duration(m * 20)
@@ -256,56 +370,16 @@ function area_bar(csv, historical) {
         .attr("y", function(d) { return y(d.y0 + d.y); })
         .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
     
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
+    /************************
+        UPDATE FUNCTIONS
+    ************************/
     
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-    
-    svg.append("g")
-        .attr("class", "ry axis")
-        .attr("transform", "translate(" + width + ",0)")
-        .call(ryAxis);
-    
-    svg.append("text")
-        .style("text-anchor", "middle")
-        .attr("transform", "translate(" + width/2 + "," + (height+1.5*margin.bottom) + ")")
-        .text("Year");
-    
-    svg.append("text")
-        .style("text-anchor", "middle")
-        .attr("transform", "rotate(-90) translate(" + -height/2 + "," + -0.75*margin.left + ")")
-        .text("% Assets");
-    
-    svg.append("text")
-        .style("text-anchor", "middle")
-        .attr("transform", "rotate(90) translate(" + height/2 + "," + -(width+0.75*margin.right) + ")")
-        .text("$ Investment Needed");
-    
-    var path_legend = svg.selectAll('.path_legend')
-        .data([['projection','green','lightgreen'],['investment','black','gray']])
-        .enter().append('g')
-        .attr('transform', 'translate('+(width-160)+','+(height+margin.bottom)+')');
-    path_legend.append('rect')
-        .attr('x', function(d, i) { return i * 80; })
-        .attr('height', 5)
-        .attr('width', 15)
-        .attr('fill', function(d) { return d[1]; });
-    path_legend.append('rect')
-        .attr('x', function(d, i) { return i * 80 + 2; })
-        .attr('y', 1)
-        .attr('height', 3)
-        .attr('width', 11)
-        .attr('fill', function(d) { return d[2]; });
-    path_legend.append('text')
-        .attr('x', function(d, i) { return i * 80 + 20; })
-        .attr('y', 5)
-        .text(function(d) { return d[0]; });
-    
-    d3.selectAll("input").on("change", change);
+    function update_year(d) {
+        sunburst_updater(d.x);
+        svg.select('.indicator')
+            .transition().duration(500)
+            .attr('transform', 'translate('+(x(d.x)+x.rangeBand()/2)+','+height+')');
+    }
     
     function update_tooltip(d, i) {
         var tooltip_html = '<b>'+d.x+'</b>' + '<br>';
@@ -317,34 +391,34 @@ function area_bar(csv, historical) {
         $('.ui-tooltip-content').html(tooltip_html);
     }
     
-    function change() {
-        if (this.value === "grouped") transitionGrouped();
-        else transitionStacked();
-    }
-    
-    function transitionGrouped() {
-        y.domain([0, yGroupMax]);
-        
-        rect.transition()
-            .duration(500)
-            .delay(function(d, i) { return i * 10; })
-                .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
-                .attr("width", x.rangeBand() / n)
-            .transition()
-                .attr("y", function(d) { return y(d.y); })
-                .attr("height", function(d) { return height - y(d.y); });
-    }
-    
-    function transitionStacked() {
-        y.domain([0, yStackMax]);
-        
-        rect.transition()
-            .duration(500)
-            .delay(function(d, i) { return i * 10; })
-                .attr("y", function(d) { return y(d.y0 + d.y); })
-                .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
-            .transition()
-                .attr("x", function(d) { return x(d.x); })
-                .attr("width", x.rangeBand());
-    }
+//    function change() {
+//        if (this.value === "grouped") transitionGrouped();
+//        else transitionStacked();
+//    }
+//    
+//    function transitionGrouped() {
+//        y.domain([0, yGroupMax]);
+//        
+//        rect.transition()
+//            .duration(500)
+//            .delay(function(d, i) { return i * 10; })
+//                .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+//                .attr("width", x.rangeBand() / n)
+//            .transition()
+//                .attr("y", function(d) { return y(d.y); })
+//                .attr("height", function(d) { return height - y(d.y); });
+//    }
+//    
+//    function transitionStacked() {
+//        y.domain([0, yStackMax]);
+//        
+//        rect.transition()
+//            .duration(500)
+//            .delay(function(d, i) { return i * 10; })
+//                .attr("y", function(d) { return y(d.y0 + d.y); })
+//                .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+//            .transition()
+//                .attr("x", function(d) { return x(d.x); })
+//                .attr("width", x.rangeBand());
+//    }
 }
