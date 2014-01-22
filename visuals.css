@@ -21,21 +21,44 @@ body {
 }
     
 #sunburst {
-    text-align:center;
     width: 40%;
 }
 
 #sunburst path {
-  stroke: #fff;
-  fill-rule: evenodd;
+    stroke: white;
+    fill-rule: evenodd;
 }
 
 #sunburst path:hover {
     opacity: 0.7;
 }
-    
-#sunburst text {
-    font-size: 1em;
+
+#sunburst .floating {
+    position: absolute;
+}
+
+#sunburst .toggle:hover {
+    opacity: 0.7;
+}
+
+#sunburst .legend {
+    background-color: rgba(255,255,255,0.9);
+    width: 40%;
+    height: 0px;
+    overflow: hidden;
+    font-size: 0.8em;
+    border-radius: 10px;
+}
+
+#sunburst .legend ul {
+    padding: 10px;
+    margin: 0;
+    list-style: none;
+}
+
+#sunburst .legend li {
+    width: 50%;
+    float: left;
 }
     
 #area_bar {

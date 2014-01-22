@@ -1,9 +1,10 @@
 // http://bl.ocks.org/mbostock/4348373
 var sunburst_updater;
 function sunburst(csv) {
-    var container = $('#sunburst');
+    var container = d3.select('#sunburst');
+    var jqcontainer = $('#sunburst');
     
-    var width = container.width(),
+    var width = jqcontainer.width(),
         height = width,
         radius = Math.min(width, height) / 2 - 50;
     
@@ -13,7 +14,7 @@ function sunburst(csv) {
     var y = d3.scale.sqrt()
         .range([0, radius]);
     
-    var svg = d3.select("#sunburst").append("svg")
+    var svg = container.append("svg")
         .attr("width", width)
         .attr("height", height)
       .append("g")
@@ -66,9 +67,33 @@ function sunburst(csv) {
         .on("click", click)
         .on("mousemove", update_tooltip);
     
-    var legend = $('#title');
-    legend.html('<h2>'+currentYear+'</h2>'
+    var title = $('#title');
+    title.html('<h2>'+currentYear+'</h2>'
                +'<p>'+format_dollars(partitioned[0].value)+'</p>');
+    
+    var legend = container.append('div')
+        .attr('class', 'legend floating')
+        .style('left', jqcontainer.offset().left+'px')
+        .style('top', jqcontainer.offset().top+50+'px');
+    legend.append('ul').selectAll('li')
+        .data(d3.keys(color_scheme))
+        .enter().append('li')
+        .append('svg').attr('width', 10).attr('height', 10)
+        .append('rect').attr('width', 10).attr('height', 10)
+        .attr('fill',function(d) { return color_scheme[d]; });
+    legend.selectAll('li')
+        .append('text')
+        .text(function(d) { return ' '+d.replace('_',' '); })
+        .style('color', function(d) { return color_scheme[d]; });
+    
+    var legend_toggle = container.append('img')
+        .attr('class', 'toggle floating')
+        .attr('src', 'list.png')
+        .attr('width', width/10)
+        .attr('height', width/10)
+        .style('top', jqcontainer.offset().top+width/10+'px')
+        .style('left', jqcontainer.offset().left+width*9/10+'px')
+        .on('click', toggle_legend);
     
     sunburst_updater = function(year) {
         if (year >= currentYear) {
@@ -79,7 +104,7 @@ function sunburst(csv) {
             path.data(partitioned)
                 .transition().duration(500)
                 .attrTween("d", yearTween);
-            legend.html('<h2>'+year+'</h2>'
+            title.html('<h2>'+year+'</h2>'
                    +'<p>'+format_dollars(partitioned[0].value)+'</p>');
         }
     }
@@ -112,6 +137,17 @@ function sunburst(csv) {
     function update_tooltip(d) {
         d3.select(".ui-tooltip-content")
             .html('<b>'+d.name+'</b><br>'+format_dollars(d.value));
+    }
+    
+    function toggle_legend() {
+        if (legend.style('top') === '10px')
+            legend.transition()
+                .style('top', jqcontainer.offset().top+50+'px')
+                .style('height', '0px');
+        else
+            legend.transition()
+                .style('top', '10px')
+                .style('height', jqcontainer.offset().top+40+'px');
     }
     
     // Interpolate the scales!

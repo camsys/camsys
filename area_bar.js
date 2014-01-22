@@ -2,8 +2,9 @@
 function area_bar(csv, historical) {
     
 //    // add group/stack radio buttons
-    var container = $('#area_bar');
-//        container.append('\
+    var jqcontainer = $('#area_bar');
+    var container = d3.select('#area_bar');
+//        jqcontainer.append('\
 //            <form>\
 //              <label><input type="radio" name="mode" value="grouped"> Grouped</label>\
 //              <label><input type="radio" name="mode" value="stacked" checked> Stacked</label>\
@@ -93,8 +94,8 @@ function area_bar(csv, historical) {
         xAxisValues.push(xAxisValues[xAxisValues.length-1]+5);
     
     var margin = {top: 40, right: 60, bottom: 20, left: 40},
-        width = container.width() - margin.left - margin.right,
-        height = container.width()/5*3 - margin.top - margin.bottom;
+        width = jqcontainer.width() - margin.left - margin.right,
+        height = jqcontainer.width()/5*3 - margin.top - margin.bottom;
     
     var x = d3.scale.ordinal()
         .domain(d3.range(startingYear, endYear+1))
@@ -148,7 +149,7 @@ function area_bar(csv, historical) {
         PRIMARY SVG SETUP
     ************************/
     
-    var svg = d3.select("#area_bar").append("svg")
+    var svg = container.append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + 2*margin.bottom)
         .attr("title", "...")
