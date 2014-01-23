@@ -104,14 +104,18 @@ var SGR_module = function () {
     function in_good_repair(type, years) {
         return TERM(type)(years) >= 2.5;
     }
+    function raw_adjusted_cost(type, years, init_cost) {
+        return init_cost * Math.pow(1.03, years);
+    }
     function replacement_cost(type, years, init_cost) {
-        return in_good_repair(type, years) ? 0 : init_cost * Math.pow(1.03, years);
+        return in_good_repair(type, years) ? 0 : raw_adjusted_cost(type, years, init_cost);
     }
     function percent_original_investment(type, years, init_cost) {
         return replacement_cost(type, years, init_cost) / init_cost;
     }
     return {
         in_good_repair: in_good_repair,
+        raw_adjusted_cost: raw_adjusted_cost,
         replacement_cost: replacement_cost,
         percent_original_investment: percent_original_investment
     };

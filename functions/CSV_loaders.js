@@ -90,6 +90,68 @@ var CSV = function (csv) {
         
         return gmbb;
     }
+    
+    function constrained_gmbb(year) {
+        var budget = yearly_budget;
+        var bad_queue = [];
+        var backlog_queue = [];
+        function compare(a,b) {
+            return a[1] < b[1] ? 1 :
+                a[1] > b[1] ? -1 : 0;
+        }
+        
+        var gmbb = {
+            good: 0.,
+            marginal: 0.,
+            bad: 0.,
+            backlog: 0.,
+        };
+        
+        for (var i in csv) {
+            var asset = csv[i];
+            var replacement_year = projected_lifespan(asset.type) + parseInt(asset.year(year));
+            var measure = weight_metric(asset, year);
+            if (replacement_year === year) {
+                gmbb.bad += measure;
+                bad_queue.push([asset, measure,
+                                SGR.raw_adjusted_cost(asset.type,
+                                                      year-parseInt(asset.year(year)),
+                                                      asset.price)]);
+            }
+            else if (replacement_year < year) {
+                gmbb.backlog += measure;
+                backlog_queue.push([asset, measure,
+                                    SGR.raw_adjusted_cost(asset.type,
+                                                          year-parseInt(asset.year(year)),
+                                                          asset.price)]);
+            }
+            else if (replacement_year === year + 1)
+                gmbb.marginal += measure;
+            else
+                gmbb.good += measure;
+        }
+        
+        var total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
+        for (var i in gmbb) gmbb[i] /= total;
+        
+        bad_queue.sort(compare);
+        backlog_queue.sort(compare);
+        var queue = backlog_queue.concat(bad_queue);
+        
+        while (budget > 0 && queue.length > 0) {
+            var i = queue.length-1;
+            while (i >= 0 && queue[i][2] > budget)
+                i--;
+            if (i < 0) break;
+            var replaced = queue.splice(i,1)[0];
+            replaced[0].years.push(year);
+            budget -= replaced[2];
+        }
+        
+        gmbb.invested = yearly_budget - budget;
+        
+        return gmbb;
+    }
         
     function per_year(func, years) {
         if (years[0] === undefined)
@@ -109,8 +171,11 @@ var CSV = function (csv) {
         // percent/ratio dollars in good repair
         // investment needed
         // % of original investment needed
-        'gmbb': function (years) {
+        gmbb: function (years) {
             return per_year(GMBB, years);
+        },
+        constrained_gmbb: function (years) {
+            return per_year(constrained_gmbb, years);
         },
         'total investment': function (years) {
             return per_year(total_investment, years);
