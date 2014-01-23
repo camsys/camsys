@@ -35,7 +35,7 @@ function sunburst(csv) {
     var data = csv;
         
     var root = data.format.flare(function (asset) {
-        return SGR.replacement_cost(asset.type, currentYear-asset.year, asset.price);
+        return SGR.replacement_cost(asset.type, currentYear-asset.year(currentYear), asset.price);
     });
     
     var partitioned = partition.nodes(root);
@@ -112,7 +112,7 @@ function sunburst(csv) {
     sunburst_updater = function(year) {
         if (year >= currentYear) {
             root = data.format.flare(function (asset) {
-                return SGR.replacement_cost(asset.type, year-asset.year, asset.price);
+                return SGR.replacement_cost(asset.type, year-asset.year(year), asset.price);
             });
             partitioned = partition.nodes(root);
             path.data(partitioned)

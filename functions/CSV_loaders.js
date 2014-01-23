@@ -11,7 +11,6 @@ var CSV = function (csv) {
                 var size = metric(asset);
                 var name = asset.serial;
                 var type = asset.type;
-                var year = asset.year;
                 var clas = class_of_asset(type);
                 if (!trim | size > 0) {
                     // add the class
@@ -38,8 +37,7 @@ var CSV = function (csv) {
                         });
                     json_data.children[class_index].children[type_index].children.push({
                         name: name,
-                        size: size,
-                        year: year
+                        size: size
                     });
                 }
             }
@@ -59,7 +57,7 @@ var CSV = function (csv) {
         var total = 0.;
         for (var i in csv) {
             total += SGR.replacement_cost(csv[i].type,
-                                          year-parseInt(csv[i].year),
+                                          year-parseInt(csv[i].year(year)),
                                           csv[i].price);
         }
         return total;
@@ -75,7 +73,7 @@ var CSV = function (csv) {
         
         for (var i in csv) {
             var asset = csv[i];
-            var replacement_year = projected_lifespan(asset.type) + parseInt(asset.year);
+            var replacement_year = projected_lifespan(asset.type) + parseInt(asset.year(year));
             var measure = weight_metric(asset, year);
             if (replacement_year === year)
                 gmbb.bad += measure;

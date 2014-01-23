@@ -61,6 +61,7 @@ body {
     width: 50%;
     float: left;
     transition: all 0.1s linear;
+    border-radius: 5px;
 }
 
 #sunburst .legend .highlighted {

@@ -42,7 +42,7 @@
                 endYear = 2020,
                 threshold = 80,
                 weight_metric = function (asset, year) {
-                    return asset.price * Math.pow(1.03, year-asset.year) * asset.volume;
+                    return asset.price * Math.pow(1.03, year-asset.year(year)) * asset.volume;
                 },
                 color_scheme = {
                     total: '#393b79',

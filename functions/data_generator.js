@@ -40,7 +40,7 @@ var price_range = {
 var year_range = {
     bus: [1990,2010],
     light_rail: [1975,2005],
-    street: [10000,50000],
+    street: [1990,2000],
     track: [1980,2005],
     building_utilities: [1950,1980],
     maintenance_building: [1940,1970],
@@ -70,14 +70,24 @@ function generate_assets(n) {
     for (var i=0; i<n; i++) {
         var r = Math.random();
         for (var j in asset_distribution) {
-            if (r >= asset_distribution[j][0] & r < asset_distribution[j][1])
-                csv.push({
-                    serial: j.toUpperCase()+i,
-                    type: j,
-                    year: random_integer(year_range[j]),
-                    price: random_integer(price_range[j]),
-                    volume: asset_volume[j]
-                });
+            if (r >= asset_distribution[j][0] & r < asset_distribution[j][1]) {
+                (function(){ // scoping issues
+                    var years_array = [random_integer(year_range[j])];
+                    csv.push({
+                        serial: j.toUpperCase()+i,
+                        type: j,
+                        years: years_array,
+                        year: function(y) {
+                            var k = years_array.length-1;
+                            while (years_array[k] >= y)
+                                k--;
+                            return years_array[k];
+                        },
+                        price: random_integer(price_range[j]),
+                        volume: asset_volume[j]
+                    });
+                })();
+            }
         }
     }
     return csv;
