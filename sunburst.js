@@ -44,6 +44,7 @@ function sunburst(csv) {
     var path = svg.selectAll("path")
         .data(partitioned)
         .enter().append("path")
+        .attr('class', function(d) { return d.name.replace(' ','_'); })
         .attr("d", arc)
         .each(function(d){
             old[d.name] = {
@@ -78,6 +79,19 @@ function sunburst(csv) {
     legend.append('ul').selectAll('li')
         .data(d3.keys(color_scheme))
         .enter().append('li')
+        .attr('class', function(d) { return d; })
+        .on('mouseover', function(d) {
+            d3.select(this).classed('highlighted', true);
+        })
+        .on('mouseleave', function(d) {
+            d3.select(this).classed('highlighted', false);
+        })
+        .on('click', function(d) {
+            svg.select('.'+d).each(function(d) {
+                if (d.dx > 0)
+                    click(d);
+            });
+        })
         .append('svg').attr('width', 10).attr('height', 10)
         .append('rect').attr('width', 10).attr('height', 10)
         .attr('fill',function(d) { return color_scheme[d]; });
@@ -102,7 +116,7 @@ function sunburst(csv) {
             });
             partitioned = partition.nodes(root);
             path.data(partitioned)
-                .transition().duration(500)
+                .transition().duration(500).ease('cubic-out')
                 .attrTween("d", yearTween);
             title.html('<h2>'+year+'</h2>'
                    +'<p>'+format_dollars(partitioned[0].value)+'</p>');
@@ -141,11 +155,11 @@ function sunburst(csv) {
     
     function toggle_legend() {
         if (legend.style('top') === '10px')
-            legend.transition()
+            legend.transition().ease('cubic-out')
                 .style('top', jqcontainer.offset().top+50+'px')
                 .style('height', '0px');
         else
-            legend.transition()
+            legend.transition().ease('cubic-out')
                 .style('top', '10px')
                 .style('height', jqcontainer.offset().top+40+'px');
     }

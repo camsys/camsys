@@ -378,7 +378,7 @@ function area_bar(csv, historical) {
     function update_year(d) {
         sunburst_updater(d.x);
         svg.select('.indicator')
-            .transition().duration(500)
+            .transition().duration(500).ease('cubic-out')
             .attr('transform', 'translate('+(x(d.x)+x.rangeBand()/2)+','+height+')');
     }
     
