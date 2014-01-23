@@ -102,7 +102,7 @@ function sunburst(csv) {
     
     var legend_toggle = container.append('img')
         .attr('class', 'toggle floating')
-        .attr('src', 'list.png')
+        .attr('src', 'images/list.png')
         .attr('width', width/10)
         .attr('height', width/10)
         .style('top', jqcontainer.offset().top+width/10+'px')
