@@ -1,5 +1,7 @@
 var CSV = function (csv) {
     
+    // format data into the 'flare.json' format
+    // found on many D3 examples
     var format = {
         flare: function (metric, trim) {
             var json_data = {
@@ -53,6 +55,8 @@ var CSV = function (csv) {
         }
     };
     
+    // calculates the good/marginal/bad/backlog
+    // percentages per year
     function GMBB(year, options) {
         var constrained = options.constrained;
         
@@ -130,6 +134,7 @@ var CSV = function (csv) {
         return gmbb;
     }
         
+    // runs a given function over multiple years
     function per_year(func, years, options) {
         if (years[0] === undefined)
             return func(years, options);
@@ -144,10 +149,6 @@ var CSV = function (csv) {
     }
     
     var system_metric = {
-        // percent/ratio assets in good repair
-        // percent/ratio dollars in good repair
-        // investment needed
-        // % of original investment needed
         gmbb: function (years, options) {
             return per_year(GMBB, years, options);
         }

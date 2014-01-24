@@ -37,6 +37,7 @@
             </ul>
         </div>
         <script>
+            // CONFIG
             var startYear = 1990,
                 currentYear = 2013,
                 endYear = 2020,
@@ -64,6 +65,7 @@
             var csv = CSV(generate_assets(100), false);
             area_bar(csv);
             sunburst(csv);
+            
             $('#visuals').tooltip({
                 track: true,
                 show: false,

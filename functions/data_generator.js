@@ -65,6 +65,17 @@ for (var i in asset_distribution) {
     total = max;
 }
 
+/*******************************
+    SCHEMA:
+    {
+        serial: STRING (unique ID)
+        type: STRING (type of asset)
+        years: INTEGERS ARRAY (years of purchase/replacement)
+        year: injected fetch function
+        price: INTEGER
+        volume: INTEGER (related to ridership)
+    }
+*******************************/
 function generate_assets(n) {
     var csv = [];
     for (var i=0; i<n; i++) {
