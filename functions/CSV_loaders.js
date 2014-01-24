@@ -1,5 +1,18 @@
 var CSV = function (csv) {
     
+    // inject year fetcher function
+    for (var i in csv) {
+        (function() {
+            var years_array = csv[i].years;
+            csv[i].year = function(y) {
+                var k = years_array.length-1;
+                while (years_array[k] >= y)
+                    k--;
+                return years_array[k];
+            };
+        })();
+    }
+    
     // format data into the 'flare.json' format
     // found on many D3 examples
     var format = {
@@ -64,6 +77,7 @@ var CSV = function (csv) {
         var investment= 0;
         var bad_queue = [];
         var backlog_queue = [];
+        var marginal_queue = [];
         function compare(a,b) {
             return a[1] < b[1] ? 1 :
                 a[1] > b[1] ? -1 : 0;
@@ -80,29 +94,30 @@ var CSV = function (csv) {
             var asset = csv[i];
             var replacement_year = projected_lifespan(asset.type) + parseInt(asset.year(year));
             var measure = weight_metric(asset, year);
+            var raw_cost = SGR.raw_adjusted_cost(asset.type,
+                                                 year-parseInt(asset.year(year)),
+                                                 asset.price);
             investment += SGR.replacement_cost(asset.type,
                                                year-parseInt(asset.year(year)),
                                                asset.price);
             if (replacement_year === year) {
                 gmbb.bad += measure;
                 if (constrained) {
-                    bad_queue.push([asset, measure,
-                                    SGR.raw_adjusted_cost(asset.type,
-                                                          year-parseInt(asset.year(year)),
-                                                          asset.price)]);
+                    bad_queue.push([asset, measure, raw_cost]);
                 }
             }
             else if (replacement_year < year) {
                 gmbb.backlog += measure;
                 if (constrained) {
-                    backlog_queue.push([asset, measure,
-                                        SGR.raw_adjusted_cost(asset.type,
-                                                              year-parseInt(asset.year(year)),
-                                                              asset.price)]);
+                    backlog_queue.push([asset, measure, raw_cost]);
                 }
             }
-            else if (replacement_year === year + 1)
+            else if (replacement_year === year + 1) {
                 gmbb.marginal += measure;
+                if (constrained) {
+                    marginal_queue.push([asset, measure, raw_cost]);
+                }
+            }
             else
                 gmbb.good += measure;
         }
@@ -113,7 +128,8 @@ var CSV = function (csv) {
         if (constrained) {
             bad_queue.sort(compare);
             backlog_queue.sort(compare);
-            var queue = bad_queue.concat(backlog_queue);
+            marginal_queue.sort(compare);
+            var queue = backlog_queue.concat(marginal_queue.concat(bad_queue));
             
             while (budget > 0 && queue.length > 0) {
                 var i = queue.length-1;

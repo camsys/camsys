@@ -13,6 +13,7 @@
         <script src="functions/CSV_loaders.js"></script>
         <script src="d3/sunburst.js"></script>
         <script src="d3/area_bar.js"></script>
+        <script src="sample_data.js"></script>
     </head>
     <body>
         <div id='title'></div>
@@ -62,7 +63,8 @@
                     light_rail: '#969696'
                 };
             
-            var csv = CSV(generate_assets(100), false);
+//            var csv = CSV(generate_assets(100));
+            var csv = CSV(sample_data);
             area_bar(csv);
             sunburst(csv);
             

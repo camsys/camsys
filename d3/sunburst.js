@@ -129,7 +129,7 @@ function sunburst(csv) {
         .attr('src', 'images/list.png')
         .attr('width', width/10)
         .attr('height', width/10)
-        .style('top', jqcontainer.offset().top+'px')
+        .style('top', jqcontainer.offset().top+10+'px')
         .style('left', jqcontainer.offset().left+width*9/10+'px')
         .on('click', toggle_legend);
     

@@ -74,6 +74,7 @@ function area_bar(csv) {
         layers = stack(d3.range(n).map(function(i) { return layer_data[i]; })),
         yMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); }),
         ryMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.ry; }); });
+    ryMax = constrained ? yearly_budget : ryMax;
     
     var margin = {top: 40, right: 60, bottom: 20, left: 40},
         width = jqcontainer.width() - margin.left - margin.right,

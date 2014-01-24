@@ -71,7 +71,6 @@ for (var i in asset_distribution) {
         serial: STRING (unique ID)
         type: STRING (type of asset)
         years: INTEGERS ARRAY (years of purchase/replacement)
-        year: injected fetch function
         price: INTEGER
         volume: INTEGER (related to ridership)
     }
@@ -82,22 +81,13 @@ function generate_assets(n) {
         var r = Math.random();
         for (var j in asset_distribution) {
             if (r >= asset_distribution[j][0] & r < asset_distribution[j][1]) {
-                (function(){ // scoping issues
-                    var years_array = [random_integer(year_range[j])];
-                    csv.push({
-                        serial: j.toUpperCase()+i,
-                        type: j,
-                        years: years_array,
-                        year: function(y) {
-                            var k = years_array.length-1;
-                            while (years_array[k] >= y)
-                                k--;
-                            return years_array[k];
-                        },
-                        price: random_integer(price_range[j]),
-                        volume: asset_volume[j]
-                    });
-                })();
+                csv.push({
+                    serial: j.toUpperCase()+i,
+                    type: j,
+                    years: [random_integer(year_range[j])],
+                    price: random_integer(price_range[j]),
+                    volume: asset_volume[j]
+                });
             }
         }
     }
