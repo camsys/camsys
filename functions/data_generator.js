@@ -93,7 +93,7 @@ function generate_assets(n) {
     return csv;
 }
 
-function generate_history(start, end) {
+function generate_history(start, end, constrained) {
     var yearly_data = {};
     for (var year=start; year<=end; year++) {
         var good = 0.5+Math.random()*0.3;
@@ -105,7 +105,7 @@ function generate_history(start, end) {
             marginal: marginal,
             bad: bad,
             backlog: backlog,
-            investment: 80000000*(1.2-good)
+            investment: constrained ? yearly_budget*(1.5-good) : 80000000*(1.2-good)
         };
     }
     return yearly_data;

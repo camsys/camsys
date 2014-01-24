@@ -1,35 +1,26 @@
 // http://bl.ocks.org/mbostock/3943967
-function area_bar(csv, historical) {
+function area_bar(csv) {
     
-//    // add group/stack radio buttons
     var jqcontainer = $('#area_bar');
     var container = d3.select('#area_bar');
-//        jqcontainer.append('\
-//            <form>\
-//              <label><input type="radio" name="mode" value="grouped"> Grouped</label>\
-//              <label><input type="radio" name="mode" value="stacked" checked> Stacked</label>\
-//            </form>');
-//    
-//    d3.selectAll("input").on("change", change);
+    jqcontainer.css('height', jqcontainer.width()/5*3);
     
     /************************
         DATA SETUP
     ************************/
     
-    // set the starting x value
-    var startingYear = currentYear;
-    if (historical)
-        startingYear = startYear;
+    // set the starting x value and constraint
+    var startingYear = Math.min(startYear, currentYear);
+    var constrained = yearly_budget !== undefined;
     
     // get projected data for future years
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
-    var yearly_gmbb_data = csv.system_metric.gmbb(years);
-    var yearly_total_investment = csv.system_metric["total investment"](years);
+    var yearly_gmbb_data = csv.system_metric.gmbb(years, {constrained: constrained});
     
     // generate historical data
-    var historical_data = generate_history(startYear, currentYear-1);
+    var historical_data = generate_history(startYear, currentYear-1, constrained);
     
     // merge the two datasets
     var data = [];
@@ -38,28 +29,25 @@ function area_bar(csv, historical) {
         if (data.length === 0) {
             var index = 0;
             for (var k in yearly_gmbb_data[i]) {
-                data.push({
-                    data: [],
-                    label: k
-                });
-                index_mapping[k] = index;
-                index += 1;
+                if (k !== 'investment') {
+                    data.push([]);
+                    index_mapping[k] = index;
+                    index += 1;
+                }
             }
-            if (historical) {
-                for (var j in historical_data) {
-                    for (var l in historical_data[j]) {
-                        if (l !== 'investment')
-                            data[index_mapping[l]].data.push([parseInt(j),
-                                                              historical_data[j][l],
-                                                              historical_data[j]['investment']]);
-                    }
+            for (var j in historical_data) {
+                for (var l in historical_data[j]) {
+                    if (l !== 'investment')
+                        data[index_mapping[l]].push([parseInt(j),
+                                                     historical_data[j][l],
+                                                     historical_data[j]['investment']]);
                 }
             }
         }
-        for (var k in yearly_gmbb_data[i]) {
-            data[index_mapping[k]].data.push([parseInt(i),
-                                              yearly_gmbb_data[i][k],
-                                              yearly_total_investment[i]]);
+        for (var j in index_mapping) {
+            data[index_mapping[j]].push([parseInt(i),
+                                         yearly_gmbb_data[i][j],
+                                         yearly_gmbb_data[i].investment]);
         }
     }
     
@@ -67,11 +55,11 @@ function area_bar(csv, historical) {
     var layer_data = [];
     for (var i in data) {
         layer_data.push([]);
-        for (var j in data[i].data) {
+        for (var j in data[i]) {
             layer_data[i].push({
-                x: data[i].data[j][0],
-                y: data[i].data[j][1]*100,
-                ry: data[i].data[j][2]
+                x: data[i][j][0],
+                y: data[i][j][1]*100,
+                ry: data[i][j][2]
             });
         }
     }
@@ -84,57 +72,56 @@ function area_bar(csv, historical) {
         m = endYear-startingYear, // number of samples per layer
         stack = d3.layout.stack(),
         layers = stack(d3.range(n).map(function(i) { return layer_data[i]; })),
-        yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
-        yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); }),
+        yMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); }),
         ryMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.ry; }); });
+    
+    var margin = {top: 40, right: 60, bottom: 20, left: 40},
+        width = jqcontainer.width() - margin.left - margin.right,
+        height = jqcontainer.height() - margin.top - margin.bottom;
+    
+    var xScale = d3.scale.ordinal()
+        .domain(d3.range(startingYear, endYear+1))
+        .rangeRoundBands([0, width], .08);
+    
+    var yScale = d3.scale.linear()
+        .domain([0, yMax])
+        .range([height, 0]);
+    
+    var ryScale = d3.scale.linear()
+        .domain([0, ryMax])
+        .range([height, 0]);
+    
+    var gmbbColors = ["#22bb45", "#edc244", "#fc9247", "#c14540"];
+    
+    var legendColor = d3.scale.ordinal()
+        .domain(d3.keys(index_mapping))
+        .range(gmbbColors);
+    
+    var layerColor = d3.scale.ordinal()
+        .domain(d3.values(index_mapping))
+        .range(gmbbColors);
     
     var xAxisValues = [startingYear];
     
     while (xAxisValues[xAxisValues.length-1] <= endYear-5)
         xAxisValues.push(xAxisValues[xAxisValues.length-1]+5);
     
-    var margin = {top: 40, right: 60, bottom: 20, left: 40},
-        width = jqcontainer.width() - margin.left - margin.right,
-        height = jqcontainer.width()/5*3 - margin.top - margin.bottom;
-    
-    var x = d3.scale.ordinal()
-        .domain(d3.range(startingYear, endYear+1))
-        .rangeRoundBands([0, width], .08);
-    
-    var y = d3.scale.linear()
-        .domain([0, yStackMax])
-        .range([height, 0]);
-    
-    var ry = d3.scale.linear()
-        .domain([0, ryMax])
-        .range([height, 0]);
-    
-    var colors = ["#22bb45", "#edc244", "#fc9247", "#c14540"];
-    
-    var color = d3.scale.ordinal()
-        .domain(d3.values(index_mapping))
-        .range(colors);
-    
-    var legendColors = d3.scale.ordinal()
-        .domain(d3.keys(index_mapping))
-        .range(colors);
-    
     var xAxis = d3.svg.axis()
-        .scale(x)
+        .scale(xScale)
         .tickSize(0)
         .tickPadding(6)
         .tickValues(xAxisValues)
         .orient("bottom");
     
     var yAxis = d3.svg.axis()
-        .scale(y)
+        .scale(yScale)
         .tickSize(5)
         .tickPadding(2)
         .orient("left");
     
-    var money_levels = 'LMBT';
+    var money_levels = 'KMBT'; // monetary abbreviations
     var ryAxis = d3.svg.axis()
-        .scale(ry)
+        .scale(ryScale)
         .tickSize(5)
         .tickPadding(2)
         .tickFormat(function(d) {
@@ -160,15 +147,15 @@ function area_bar(csv, historical) {
         .data(layers)
       .enter().append("g")
         .attr("class", "layer")
-        .style("fill", function(d, i) { return color(i); });
+        .style("fill", function(d, i) { return layerColor(i); });
     
     var rect = layer.selectAll("rect")
         .data(function(d) { return d; })
       .enter().append("rect")
         .attr('class', function(d, i) { return 'rect'+i; })
-        .attr("x", function(d) { return x(d.x); })
+        .attr("x", function(d) { return xScale(d.x); })
         .attr("y", height)
-        .attr("width", x.rangeBand())
+        .attr("width", xScale.rangeBand())
         .attr("height", 0)
         .on("click", update_year)
         .on('mouseover', function(d, i) {
@@ -184,10 +171,10 @@ function area_bar(csv, historical) {
         });
     
     var threshold_mask = svg.append("rect")
-        .attr("x", x(startingYear))
-        .attr("y", y(100))
-        .attr("width", x(endYear) + x.rangeBand() - x(startingYear))
-        .attr("height", y(threshold) - y(100))
+        .attr("x", xScale(startingYear))
+        .attr("y", yScale(100))
+        .attr("width", xScale(endYear) + xScale.rangeBand() - xScale(startingYear))
+        .attr("height", yScale(threshold) - yScale(100))
         .attr("fill", "white")
         .style("opacity", 0.5)
         .style("pointer-events", "none");
@@ -196,33 +183,30 @@ function area_bar(csv, historical) {
         AXES AND LABELS
     ************************/
     
-    svg.append("g")
-        .attr("class", "x axis")
+    var x_axis = svg.append("g")
+        .attr("class", "xaxis axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
-    
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-    
-    svg.append("g")
-        .attr("class", "ry axis")
-        .attr("transform", "translate(" + width + ",0)")
-        .call(ryAxis);
-    
-    svg.append("text")
+    x_axis.append("text")
         .style("text-anchor", "middle")
-        .attr("transform", "translate(" + width/2 + "," + (height+1.5*margin.bottom) + ")")
+        .attr("transform", "translate(" + width/2 + "," + 1.5*margin.bottom + ")")
         .text("Year");
     
-    svg.append("text")
+    var y_axis = svg.append("g")
+        .attr("class", "yaxis axis")
+        .call(yAxis);
+    y_axis.append("text")
         .style("text-anchor", "middle")
         .attr("transform", "rotate(-90) translate(" + -height/2 + "," + -0.75*margin.left + ")")
         .text("% Assets");
     
-    svg.append("text")
+    var ry_axis = svg.append("g")
+        .attr("class", "ryaxis axis")
+        .attr("transform", "translate(" + width + ",0)")
+        .call(ryAxis);
+    ry_axis.append("text")
         .style("text-anchor", "middle")
-        .attr("transform", "rotate(90) translate(" + height/2 + "," + -(width+0.75*margin.right) + ")")
+        .attr("transform", "rotate(90) translate(" + height/2 + "," + -0.75*margin.right + ")")
         .text("$ Investment Needed");
     
     /************************
@@ -237,7 +221,7 @@ function area_bar(csv, historical) {
         .attr("y", -15)
         .attr('width', 10)
         .attr('height', 10)
-        .style('fill', function(d) { return legendColors(d); });
+        .style('fill', function(d) { return legendColor(d); });
     bar_legend.append("text")
         .attr("x", function(d, i) { return 15 + 80 * i; })
         .attr("y", -7)
@@ -274,12 +258,12 @@ function area_bar(csv, historical) {
     };
     
     var indicator = svg.append("polygon")
-        .datum([{x: 0, y: -x.rangeBand()/2},
-                {x: -x.rangeBand()/2, y: 0},
-                {x: x.rangeBand()/2, y: 0}])
+        .datum([{x: 0, y: -xScale.rangeBand()/2},
+                {x: -xScale.rangeBand()/2, y: 0},
+                {x: xScale.rangeBand()/2, y: 0}])
         .attr('class', 'indicator')
         .attr("points", polygon)
-        .attr("transform", "translate("+(x(currentYear)+x.rangeBand()/2)+","+height+")")
+        .attr("transform", "translate("+(xScale(currentYear)+xScale.rangeBand()/2)+","+height+")")
         .attr("fill", "black");
     
     /************************
@@ -299,22 +283,22 @@ function area_bar(csv, historical) {
     };
     
     var flat_line = d3.svg.line()
-        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
+        .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
         .y(function(d) { return height; })
         .interpolate('basis');
     
     var division_line = d3.svg.line()
-        .x(function(d) { return x(currentYear) - 1; })
-        .y(function(d) { return y(d.x); });
+        .x(function(d) { return xScale(currentYear) - 1; })
+        .y(function(d) { return yScale(d.x); });
     
     var investment_line = d3.svg.line()
-        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
-        .y(function(d) { return ry(d.ry); })
+        .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
+        .y(function(d) { return ryScale(d.ry); })
         .interpolate('basis');
     
     var trajectory_line = d3.svg.line()
-        .x(function(d) { return x(d.x) + x.rangeBand() / 2; })
-        .y(function(d) { return y(trajectory(d.x)); });
+        .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
+        .y(function(d) { return yScale(trajectory(d.x)); });
     
     var division_path = svg.append("path")
         .datum([{x: 0}, {x: 100}])
@@ -368,8 +352,8 @@ function area_bar(csv, historical) {
     
     rect.transition()
         .delay(function(d, i) { return i * 10; })
-        .attr("y", function(d) { return y(d.y0 + d.y); })
-        .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+        .attr("y", function(d) { return yScale(d.y0 + d.y); })
+        .attr("height", function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); });
     
     /************************
         UPDATE FUNCTIONS
@@ -379,7 +363,7 @@ function area_bar(csv, historical) {
         sunburst_updater(d.x);
         svg.select('.indicator')
             .transition().duration(500).ease('cubic-out')
-            .attr('transform', 'translate('+(x(d.x)+x.rangeBand()/2)+','+height+')');
+            .attr('transform', 'translate('+(xScale(d.x)+xScale.rangeBand()/2)+','+height+')');
     }
     
     function update_tooltip(d, i) {
@@ -391,35 +375,4 @@ function area_bar(csv, historical) {
         tooltip_html += format_dollars(d.ry);
         $('.ui-tooltip-content').html(tooltip_html);
     }
-    
-//    function change() {
-//        if (this.value === "grouped") transitionGrouped();
-//        else transitionStacked();
-//    }
-//    
-//    function transitionGrouped() {
-//        y.domain([0, yGroupMax]);
-//        
-//        rect.transition()
-//            .duration(500)
-//            .delay(function(d, i) { return i * 10; })
-//                .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
-//                .attr("width", x.rangeBand() / n)
-//            .transition()
-//                .attr("y", function(d) { return y(d.y); })
-//                .attr("height", function(d) { return height - y(d.y); });
-//    }
-//    
-//    function transitionStacked() {
-//        y.domain([0, yStackMax]);
-//        
-//        rect.transition()
-//            .duration(500)
-//            .delay(function(d, i) { return i * 10; })
-//                .attr("y", function(d) { return y(d.y0 + d.y); })
-//                .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
-//            .transition()
-//                .attr("x", function(d) { return x(d.x); })
-//                .attr("width", x.rangeBand());
-//    }
 }

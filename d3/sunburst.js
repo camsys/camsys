@@ -1,45 +1,76 @@
-// http://bl.ocks.org/mbostock/4348373
 var sunburst_updater;
+
+// http://bl.ocks.org/mbostock/4348373
 function sunburst(csv) {
+    
     var container = d3.select('#sunburst');
     var jqcontainer = $('#sunburst');
+    var title = $('#title');
+    
+    /************************
+        DATA SETUP
+    ************************/
+        
+    var root = csv.format.flare(function (asset) {
+        return SGR.replacement_cost(asset.type, currentYear-asset.year(currentYear), asset.price);
+    });
+    
+    var old = {};
+    
+    /************************
+        D3 SETUP
+    ************************/
+    
+    var padding = 25;
     
     var width = jqcontainer.width(),
-        height = width,
-        radius = Math.min(width, height) / 2 - 50;
+        height = $('#area_bar').height(),
+        radius = Math.min(width, height) / 2 - 2 * padding;
     
-    var x = d3.scale.linear()
+    var xScale = d3.scale.linear()
         .range([0, 2 * Math.PI]);
     
-    var y = d3.scale.sqrt()
+    var yScale = d3.scale.sqrt()
         .range([0, radius]);
+    
+    var partition = d3.layout.partition()
+        .value(function(d) { return d.size; })
+        .sort(function(a, b) { return d3.ascending(a.name, b.name); });
+    
+    var partitioned = partition.nodes(root);
+    
+    var arc = d3.svg.arc()
+        .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, xScale(d.x))); })
+        .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, xScale(d.x + d.dx))); })
+        .innerRadius(function(d) { return Math.max(0, yScale(d.y)); })
+        .outerRadius(function(d) { return Math.max(0, yScale(d.y + d.dy)); });
+    
+    var randomColor = d3.scale.category20b();
+    
+    function arcColor(d, i) {
+        var self_color = color_scheme[d.name];
+        if (self_color !== undefined)
+            return self_color;
+        
+        var parent_color = color_scheme[d.parent.name];
+        if (parent_color !== undefined)
+            return i % 2 === 0
+                ? d3.rgb(parent_color).brighter(Math.random())
+                : d3.rgb(parent_color).darker(Math.random());
+        
+        return randomColor(d.name);
+    }
+    
+    /************************
+        PRIMARY SVG SETUP
+    ************************/
     
     var svg = container.append("svg")
         .attr("width", width)
         .attr("height", height)
       .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
         .attr("title",'...');
-    
-    // http://bl.ocks.org/mbostock/5944371
-    var partition = d3.layout.partition()
-        .value(function(d) { return d.size; })
-        .sort(function(a, b) { return d3.ascending(a.name, b.name); });
-    
-    var arc = d3.svg.arc()
-        .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-        .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-        .innerRadius(function(d) { return Math.max(0, y(d.y)); })
-        .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
-      
-    var data = csv;
-        
-    var root = data.format.flare(function (asset) {
-        return SGR.replacement_cost(asset.type, currentYear-asset.year(currentYear), asset.price);
-    });
-    
-    var partitioned = partition.nodes(root);
-    var old = {};
     
     var path = svg.selectAll("path")
         .data(partitioned)
@@ -54,32 +85,25 @@ function sunburst(csv) {
                 dy: d.dy
             };
         })
-        .style("fill", function(d, i) {
-            var self_color = color_scheme[d.name.toLowerCase().replace(' ','_')];
-            if (self_color !== undefined)
-                return self_color;
-            else {
-                var parent_color = color_scheme[d.parent.name.toLowerCase().replace(' ','_')];
-                return i % 2 === 0
-                    ? d3.rgb(parent_color).brighter(Math.random())
-                    : d3.rgb(parent_color).darker(Math.random());
-            }
-        })
+        .style("fill", arcColor)
         .on("click", click)
         .on("mousemove", update_tooltip);
     
-    var title = $('#title');
+    /************************
+        LEGENDS SETUP
+    ************************/
+    
     title.html('<h2>'+currentYear+'</h2>'
                +'<p>'+format_dollars(partitioned[0].value)+'</p>');
     
     var legend = container.append('div')
         .attr('class', 'legend floating')
         .style('left', jqcontainer.offset().left+'px')
-        .style('top', jqcontainer.offset().top+50+'px');
+        .style('top', jqcontainer.offset().top+padding+'px');
     legend.append('ul').selectAll('li')
         .data(d3.keys(color_scheme))
         .enter().append('li')
-        .attr('class', function(d) { return d; })
+        .attr('class', function(d) { return d.replace(' ','_'); })
         .on('mouseover', function(d) {
             d3.select(this).classed('highlighted', true);
         })
@@ -105,13 +129,26 @@ function sunburst(csv) {
         .attr('src', 'images/list.png')
         .attr('width', width/10)
         .attr('height', width/10)
-        .style('top', jqcontainer.offset().top+width/10+'px')
+        .style('top', jqcontainer.offset().top+'px')
         .style('left', jqcontainer.offset().left+width*9/10+'px')
         .on('click', toggle_legend);
     
+    /************************
+        INITIAL TRANSITIONS
+    ************************/
+    
+    d3.select('body').style("opacity", 0);
+    d3.select('body').transition()
+        .duration(750)
+        .style("opacity", 1);
+    
+    /************************
+        UPDATE FUNCTIONS
+    ************************/
+    
     sunburst_updater = function(year) {
         if (year >= currentYear) {
-            root = data.format.flare(function (asset) {
+            root = csv.format.flare(function (asset) {
                 return SGR.replacement_cost(asset.type, year-asset.year(year), asset.price);
             });
             partitioned = partition.nodes(root);
@@ -123,10 +160,28 @@ function sunburst(csv) {
         }
     }
     
-    d3.select('body').style("opacity", 0);
-    d3.select('body').transition()
-        .duration(750)
-        .style("opacity", 1);
+    function click(d) {
+        path.transition()
+            .duration(750)
+            .attrTween("d", zoomTween(d));
+    }
+    
+    function update_tooltip(d) {
+        d3.select(".ui-tooltip-content")
+            .html('<b>'+(d.children ? d.name.replace('_',' ') : d.name)
+                  +'</b><br>'+format_dollars(d.value));
+    }
+    
+    function toggle_legend() {
+        if (legend.style('top') === '10px')
+            legend.transition().ease('cubic-out')
+                .style('top', jqcontainer.offset().top+padding+'px')
+                .style('visibility', 'hidden');
+        else
+            legend.transition().ease('cubic-out')
+                .style('top', '10px')
+                .style('visibility', 'visible');
+    }
     
     function yearTween(a) {
         var i = d3.interpolate(old[a.name], a);
@@ -142,37 +197,16 @@ function sunburst(csv) {
         };
     }
     
-    function click(d) {
-        path.transition()
-            .duration(750)
-            .attrTween("d", arcTween(d));
-    }
-    
-    function update_tooltip(d) {
-        d3.select(".ui-tooltip-content")
-            .html('<b>'+d.name+'</b><br>'+format_dollars(d.value));
-    }
-    
-    function toggle_legend() {
-        if (legend.style('top') === '10px')
-            legend.transition().ease('cubic-out')
-                .style('top', jqcontainer.offset().top+50+'px')
-                .style('height', '0px');
-        else
-            legend.transition().ease('cubic-out')
-                .style('top', '10px')
-                .style('height', jqcontainer.offset().top+40+'px');
-    }
-    
-    // Interpolate the scales!
-    function arcTween(d) {
-        var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
-            yd = d3.interpolate(y.domain(), [d.y, 1]),
-            yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+    function zoomTween(d) {
+        var xd = d3.interpolate(xScale.domain(), [d.x, d.x + d.dx]),
+            yd = d3.interpolate(yScale.domain(), [d.y, 1]),
+            yr = d3.interpolate(yScale.range(), [d.y ? 20 : 0, radius]);
         return function(d, i) {
             return i
                 ? function(t) { return arc(d); }
-                : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+                : function(t) { xScale.domain(xd(t));
+                                yScale.domain(yd(t)).range(yr(t));
+                                return arc(d); };
         };
     }
 }

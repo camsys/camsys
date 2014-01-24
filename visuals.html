@@ -60,17 +60,15 @@
                     bus: '#9e9ac8',
                     light_rail: '#969696'
                 };
-//            d3.csv('https://googledrive.com/host/0B4-zQkdH4geETGcwRGRELTctdVk/CAT_Fixed_Route_Vehicle_Inventory.csv', function(csv) {
-                var csv = CSV(generate_assets(100), false);
-//                csv = CSV(csv, true);
-                area_bar(csv, true);
-                sunburst(csv);
-                $('#visuals').tooltip({
-                    track: true,
-                    show: false,
-                    hide: false
-                });
-//            });
+            
+            var csv = CSV(generate_assets(100), false);
+            area_bar(csv);
+            sunburst(csv);
+            $('#visuals').tooltip({
+                track: true,
+                show: false,
+                hide: false
+            });
         </script>
     </body>
 </html>
