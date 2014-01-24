@@ -12,6 +12,19 @@ body {
 */
 }
 
+#config-form {
+    text-align: left;
+}
+#config-form label,
+#config-form input,
+#config-form textarea {
+    margin: 5px 0;
+    width: 99%;
+}
+#config-form textarea {
+    resize: vertical;
+}
+
 #visuals div {
     display: inline-block;
 }

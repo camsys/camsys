@@ -2,10 +2,10 @@
 <meta charset="utf-8">
 <html>
     <head>
-        <link href="visuals.css" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+<!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">-->
+        <link rel="stylesheet" href="jquery-ui-1.10.0.custom.css">
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="functions/data_generator.js"></script>
         <script src="functions/SGR_functions.js"></script>
@@ -14,6 +14,7 @@
         <script src="d3/sunburst.js"></script>
         <script src="d3/area_bar.js"></script>
         <script src="sample_data.js"></script>
+        <link href="visuals.css" rel="stylesheet">
     </head>
     <body>
         <div id='title'></div>
@@ -37,42 +38,20 @@
                 <li>Arc size ~ amount of investment required.</li>
             </ul>
         </div>
-        <script>
-            // CONFIG
-            var startYear = 1990,
-                currentYear = 2013,
-                endYear = 2020,
-                threshold = 80,
-                yearly_budget = 10000000,
-                weight_metric = function (asset, year) {
-                    return asset.price * Math.pow(1.03, year-asset.year(year)) * asset.volume;
-                },
-                color_scheme = {
-                    total: '#393b79',
-                    infrastructure: '#843c39',
-                    building_utilities: '#de9ed6',
-                    maintenance_building: '#ce6dbd',
-                    overhead: '#a55194',
-                    parking: '#7b4173',
-                    street: '#ad494a',
-                    systems: '#d6616b',
-                    track: '#e7969c',
-                    utility_building: '#7b4173',
-                    vehicle: '#636363',
-                    bus: '#9e9ac8',
-                    light_rail: '#969696'
-                };
-            
-//            var csv = CSV(generate_assets(100));
-            var csv = CSV(sample_data);
-            area_bar(csv);
-            sunburst(csv);
-            
-            $('#visuals').tooltip({
-                track: true,
-                show: false,
-                hide: false
-            });
-        </script>
+        <div id="config-form" title="Configuration">
+            <form>
+                <label>How far back? (year to begin accounting for historical data)</label>
+                <input class="config-field" type="text" id="startYear">
+                <label>How far forward? (year to project to)</label>
+                <input class="config-field" type="text" id="endYear">
+                <label>Good repair threshold? (assets out of 100)</label>
+                <input class="config-field" type="text" id="threshold">
+                <label>Annual budget? (in dollars)</label>
+                <input class="config-field" type="text" id="yearly_budget">
+                <label>Weight function?</label>
+                <textarea class="config-field code" id="weight_metric"></textarea>
+            </form>
+        </div>
+        <script src="setup.js"></script>
     </body>
 </html>
