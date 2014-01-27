@@ -28,3 +28,7 @@ function linear_regression(points) {
     
     return [a,b];
 }
+
+function random_integer(range) {
+    return Math.round(Math.random()*(range[1]-range[0])+range[0]);
+}

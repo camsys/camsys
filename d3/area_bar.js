@@ -1,5 +1,5 @@
 // http://bl.ocks.org/mbostock/3943967
-function area_bar(csv) {
+function area_bar(data) {
     
     var jqcontainer = $('#area_bar');
     var container = d3.select('#area_bar');
@@ -17,13 +17,13 @@ function area_bar(csv) {
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
-    var yearly_gmbb_data = csv.system_metric.gmbb(years, {constrained: constrained});
+    var yearly_gmbb_data = data.system_metric.gmbb(years, {constrained: constrained});
     
     // generate historical data
     var historical_data = generate_history(startYear, currentYear-1, constrained);
     
     // merge the two datasets
-    var data = [];
+    data = [];
     var index_mapping = {};
     for (var i in yearly_gmbb_data) {
         if (data.length === 0) {

@@ -5,7 +5,10 @@ var startYear = 1990,
     threshold = 80,
     yearly_budget = 10000000,
     weight_metric = function (asset, year) {
-        return asset.price * Math.pow(1.03, year-asset.year(year)) * asset.volume;
+        return SGR.raw_adjusted_cost(asset.type, year-asset.year(year), asset.price) * asset.volume;
+    },
+    sunburst_function = function (asset, year) {
+        return SGR.replacement_cost(asset.type, year-asset.year(year), asset.price);
     },
     color_scheme = {
         total: '#393b79',
@@ -33,8 +36,8 @@ function config(values) {
         eval('weight_metric = '+(values.weight_metric || weight_metric));
     } catch (e) {}
 
-//    var csv = CSV(generate_assets(100));
-    var csv = CSV(sample_data);
+//    var data = load_data(generate_assets(100));
+    var data = load_data(sample_data);
 //    d3.csv('http://web.mit.edu/lu16j/www/camsys/sample_data.csv', function(csv) {
 //        
 //        for (var i in csv) {
@@ -44,10 +47,10 @@ function config(values) {
 //            csv[i].volume = parseInt(csv[i].volume);
 //        }
 //        
-//        csv = CSV(csv);
+//        var data = load_data(csv);
         
-    area_bar(csv);
-    sunburst(csv);
+    area_bar(data);
+    sunburst(data);
     
     $('#visuals').tooltip({
         track: true,

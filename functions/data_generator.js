@@ -111,7 +111,3 @@ function generate_history(start, end, constrained) {
     }
     return yearly_data;
 }
-
-function random_integer(range) {
-    return Math.round(Math.random()*(range[1]-range[0])+range[0]);
-}

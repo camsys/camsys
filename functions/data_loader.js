@@ -1,4 +1,9 @@
-var CSV = function (csv) {
+var load_data = function (csv) {
+    
+    /*****************************
+        APPLY NECESSARY
+        DATA TRANSFORMATIONS
+    *****************************/
     
     // inject year fetcher function
     for (var i in csv) {
@@ -12,6 +17,10 @@ var CSV = function (csv) {
             };
         })();
     }
+    
+    /*****************************
+        DATA RE-FORMATTERS
+    *****************************/
     
     // format data into the 'flare.json' format
     // found on many D3 examples
@@ -67,6 +76,10 @@ var CSV = function (csv) {
             return json_data;
         }
     };
+    
+    /*****************************
+        SYSTEM METRICS
+    *****************************/
     
     // calculates the good/marginal/bad/backlog
     // percentages per year
@@ -149,6 +162,10 @@ var CSV = function (csv) {
         
         return gmbb;
     }
+    
+    /*****************************
+        UTILS AND EXPORTS
+    *****************************/
         
     // runs a given function over multiple years
     function per_year(func, years, options) {

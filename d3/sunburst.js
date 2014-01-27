@@ -1,7 +1,7 @@
 var sunburst_updater;
 
 // http://bl.ocks.org/mbostock/4348373
-function sunburst(csv) {
+function sunburst(data) {
     
     var container = d3.select('#sunburst');
     var jqcontainer = $('#sunburst');
@@ -11,8 +11,8 @@ function sunburst(csv) {
         DATA SETUP
     ************************/
         
-    var root = csv.format.flare(function (asset) {
-        return SGR.replacement_cost(asset.type, currentYear-asset.year(currentYear), asset.price);
+    var root = data.format.flare(function (asset) {
+        return sunburst_function(asset, currentYear);
     });
     
     var old = {};
@@ -148,8 +148,8 @@ function sunburst(csv) {
     
     sunburst_updater = function(year) {
         if (year >= currentYear) {
-            root = csv.format.flare(function (asset) {
-                return SGR.replacement_cost(asset.type, year-asset.year(year), asset.price);
+            root = data.format.flare(function (asset) {
+                return sunburst_function(asset, year);
             });
             partitioned = partition.nodes(root);
             path.data(partitioned)
