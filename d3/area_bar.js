@@ -11,7 +11,7 @@ function area_bar(data) {
     
     // set the starting x value and constraint
     var startingYear = Math.min(startYear, currentYear);
-    var constrained = yearly_budget !== undefined;
+    var constrained = yearly_budget > 0;
     
     // get projected data for future years
     var years = [];

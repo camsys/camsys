@@ -28,13 +28,13 @@ var startYear = 1990,
 
 // MODAL CONFIG FUNCTION
 function config(values) {
-    startYear = parseInt(values.startYear) || startYear;
-    endYear = parseInt(values.endYear) || endYear;
-    threshold = parseInt(values.threshold) || threshold;
-    yearly_budget = parseInt(values.yearly_budget) || yearly_budget;
-    try {
-        eval('weight_metric = '+(values.weight_metric || weight_metric));
-    } catch (e) {}
+    for (var i in values) {
+        try {
+            eval(i+' = '+values[i]+' || '+i);
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
 //    var data = load_data(generate_assets(100));
     var data = load_data(sample_data);
@@ -68,28 +68,6 @@ function config(values) {
 // display default values
 $('#config-form input').each(function() {
     $(this).attr('value', eval($(this).attr('id'))+'');
-});
-$('#config-form textarea').each(function() {
-    $(this).text(eval($(this).attr('id'))+'');
-});
-
-// enable tabbing in code input
-$('.code').on('keydown', function(e) {
-    if(e.which === 9) {
-        e.preventDefault();
-        
-        var start = $(this).get(0).selectionStart;
-        var end = $(this).get(0).selectionEnd;
-    
-        // set textarea value to: text before caret + tab + text after caret
-        $(this).val($(this).val().substring(0, start)
-                    + "     "
-                    + $(this).val().substring(end));
-    
-        // put caret at right position again
-        $(this).get(0).selectionStart = 
-        $(this).get(0).selectionEnd = start + 4;
-    }
 });
 
 // show dialog

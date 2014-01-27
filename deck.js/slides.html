@@ -12,6 +12,7 @@
         
         <!-- Extension CSS files go here. Remove or add as needed. -->
         <link rel="stylesheet" media="screen" href="extensions/navigation/deck.navigation.css">
+        <link rel="stylesheet" media="screen" href="extensions/menu/deck.menu.css">
         <link rel="stylesheet" media="screen" href="extensions/status/deck.status.css">
         <link rel="stylesheet" media="screen" href="extensions/scale/deck.scale.css">
         
@@ -26,6 +27,25 @@
         
         <!-- Required Modernizr file -->
         <script src="modernizr.custom.js"></script>
+        
+        <!-- Custom style -->
+        <style>
+            .menu-button {
+                position: absolute;
+                height: 5%;
+                top: 95%;
+                z-index: 500;
+                border: none;
+                background-color: transparent;
+                color: gray;
+            }
+            .menu-button:hover {
+                opacity: 0.7;
+            }
+            .menu-button:focus {
+                outline: 0;
+            }
+        </style>
     </head>
     <body>
         <div class="deck-container">
@@ -146,7 +166,9 @@
             </section>
             
             <section class="slide">
-                <iframe style="height:800px;width:100%" src="http://web.mit.edu/lu16j/www/camsys/visuals.html"></iframe>
+                <div style="height:100%">
+                <iframe style="height:100%;width:100%" src="http://web.mit.edu/lu16j/www/camsys/visuals.html"></iframe>
+                </div>
             </section>
             
             <!-- End slides. -->
@@ -165,6 +187,8 @@
             </p>
             
             <!-- End extension snippets. -->
+            
+            <button class="menu-button" onclick="$.deck('toggleMenu')">menu</button>
         </div>
         
         <!-- Required JS files. -->
@@ -174,6 +198,7 @@
         <!-- Extension JS files. Add or remove as needed. -->
         <script src="core/deck.core.js"></script>
         <script src="extensions/status/deck.status.js"></script>
+        <script src="extensions/menu/deck.menu.js"></script>
         <script src="extensions/navigation/deck.navigation.js"></script>
         <script src="extensions/scale/deck.scale.js"></script>
         
