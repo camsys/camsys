@@ -38,13 +38,16 @@
         
         var assets_table = assets_div.find('table');
         
+        var measure = function(i) {
+            return cumulative_data[i].price * asset_volume[i];
+        }
+        
         for (var i in cumulative_data) {
             var new_row = $('<tr><td>'+i+'</td></tr>');
             for (var j in cumulative_data[i]) {
                 new_row.append('<td><input class="gmbb" data-type="'+i+'" data-condition="'+j+'" value="'+cumulative_data[i][j]+'"></td>');
                 if (j !== 'price') {
-                    var measure = cumulative_data[i].price * asset_volume[i];
-                    gmbb[j] += measure * cumulative_data[i][j];
+                    gmbb[j] += measure(i) * cumulative_data[i][j];
                 }
             }
             assets_table.append(new_row);
@@ -63,7 +66,7 @@
         metric_div.html(svg);
         
         $('.gmbb').on('keyup', function(e) {
-            if (e.which === 13) {
+//            if (e.which === 13) {
                 $('.gmbb').each(function() {
                     var type = $(this).attr('data-type');
                     var condition = $(this).attr('data-condition');
@@ -78,8 +81,7 @@
                     for (var i in cumulative_data) {
                         for (var j in cumulative_data[i]) {
                             if (j !== 'price') {
-                                var measure = cumulative_data[i].price * asset_volume[i];
-                                gmbb[j] += measure * cumulative_data[i][j];
+                                gmbb[j] += measure(i) * cumulative_data[i][j];
                             }
                         }
                     }
@@ -94,7 +96,7 @@
                     svg += '</svg>';
                     metric_div.html(svg);
                 });
-            }
+//            }
         });
     </script>
 </html>

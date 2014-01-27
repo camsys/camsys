@@ -86,7 +86,6 @@ var load_data = function (csv) {
     function GMBB(year, options) {
         var constrained = options.constrained;
         
-        var budget = yearly_budget;
         var investment= 0;
         var bad_queue = [];
         var backlog_queue = [];
@@ -139,6 +138,7 @@ var load_data = function (csv) {
         for (var i in gmbb) gmbb[i] /= total;
         
         if (constrained) {
+            var budget = yearly_budget;
             bad_queue.sort(compare);
             backlog_queue.sort(compare);
             marginal_queue.sort(compare);

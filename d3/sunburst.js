@@ -27,6 +27,7 @@ function sunburst(data) {
         height = $('#area_bar').height(),
         radius = Math.min(width, height) / 2 - 2 * padding;
     
+    // default domain [0,1]
     var xScale = d3.scale.linear()
         .range([0, 2 * Math.PI]);
     
