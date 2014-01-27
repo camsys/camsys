@@ -19,21 +19,26 @@ var System = function (assets) {
     *****************************/
     
     this.format = {
+        
         // format data into the 'flare.json' format
         // found on many D3 examples
         flare: function (metric, trim) {
+            
+            // define root
             var json_data = {
                 name: "total",
                 children: []
             };
+            
             for (var i in assets) {
                 var asset = assets[i];
                 var size = metric(asset);
                 var name = asset.serial();
                 var type = asset.type();
                 var clas = asset.class();
+                
                 if (!trim | size > 0) {
-                    // add the class
+                    // add the class if not found
                     var class_index = json_data.children.length;
                     for (var j in json_data.children) {
                         if (json_data.children[j].name === clas)
@@ -44,7 +49,8 @@ var System = function (assets) {
                             name: clas,
                             children: []
                         });
-                    // add the type
+                    
+                    // add the type if not found
                     var type_index = json_data.children[class_index].children.length;
                     for (var j in json_data.children[class_index].children) {
                         if (json_data.children[class_index].children[j].name === type)
@@ -55,12 +61,16 @@ var System = function (assets) {
                             name: type,
                             children: []
                         });
+                    
+                    // add the asset
                     json_data.children[class_index].children[type_index].children.push({
                         name: name,
                         size: size
                     });
                 }
             }
+            
+            // format the name field
             for (var i in json_data.children) {
                 for (var j in json_data.children[i].children) {
                     name = json_data.children[i].children[j].name.toLowerCase();
@@ -69,6 +79,7 @@ var System = function (assets) {
                     json_data.children[i].children[j].name = name;
                 }
             }
+            
             return json_data;
         }
     };
@@ -83,6 +94,13 @@ var System = function (assets) {
         var constrained = options.constrained;
         
         var investment= 0;
+        var gmbb = {
+            good: 0.,
+            marginal: 0.,
+            bad: 0.,
+            backlog: 0.
+        };
+        
         var bad_queue = [];
         var backlog_queue = [];
         var marginal_queue = [];
@@ -91,12 +109,6 @@ var System = function (assets) {
                 a[1] > b[1] ? -1 : 0;
         }
         
-        var gmbb = {
-            good: 0.,
-            marginal: 0.,
-            bad: 0.,
-            backlog: 0.
-        };
         
         for (var i in assets) {
             var asset = assets[i];
@@ -104,7 +116,10 @@ var System = function (assets) {
             var replacement_year = asset.replacement_year(year);
             var measure = weight_metric(asset, year);
             var raw_cost = asset.price(year);
+            
             investment += asset.replacement_cost(year);
+            
+            // determine state of repair by proximity to replacement year
             if (replacement_year === year) {
                 gmbb.bad += measure;
                 if (constrained) {
@@ -127,26 +142,33 @@ var System = function (assets) {
                 gmbb.good += measure;
         }
         
+        // normalize
         var total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
         for (var i in gmbb) gmbb[i] /= total;
         
+        // clear as much investment as possible
+        // using bad-marginal-backlog queue order
         if (constrained) {
             var budget = yearly_budget;
+            
             bad_queue.sort(compare);
             backlog_queue.sort(compare);
             marginal_queue.sort(compare);
+            
             var queue = backlog_queue.concat(marginal_queue.concat(bad_queue));
             
             while (budget > 0 && queue.length > 0) {
                 var i = queue.length-1;
                 while (i >= 0 && queue[i][2] > budget)
-                    i--;
-                if (i < 0) break;
+                    i--; // skip over investments greater than available budget
+                if (i < 0) break; // all possible investments made\
+                
+                // replace asset
                 var replaced = queue.splice(i,1)[0];
                 replaced[0].replace(year);
                 budget -= replaced[2];
             }
-            
+            // calculate total investment
             gmbb.investment = yearly_budget - budget;
         }
         else {

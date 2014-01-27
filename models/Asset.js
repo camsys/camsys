@@ -25,7 +25,7 @@ var Asset = function(values) {
     var usage = parseInt(values.usage);
     
     /*******************************
-        DATA FETCHERS
+        DATA GETTERS/SETTERS
     *******************************/
     
     this.serial = function () { return serial; };
@@ -57,6 +57,7 @@ var Asset = function(values) {
         return this.replacement_cost(year) / price;
     };
     this.projected_lifespan = function () {
+        // secant method
         var f = function (years) { return TERM(type)(years) - 2.5; };
         var x2 = 1.;
         while (f(x2) >= 0) {
