@@ -25,6 +25,19 @@ body {
     resize: vertical;
 }
 
+#notes ul {
+    list-style: none;
+}
+#notes div {
+    float: left;
+}
+#notes-left {
+    width: 59%;
+}
+#notes-right {
+    width: 40%;
+}
+
 #visuals div {
     display: inline-block;
 }

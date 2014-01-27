@@ -65,6 +65,8 @@ function config(values) {
     MODAL SETUP
 ******************/
 
+$('#notes').css('opacity', 0);
+
 // display default values
 $('#config-form input').each(function() {
     $(this).attr('value', eval($(this).attr('id'))+'');
@@ -76,16 +78,20 @@ $('#config-form').dialog({
     height: 500,
     width: 500,
     modal: true,
+    resizable: false,
     buttons: {
         Okay: function() {
+            var values = {};
+            $('.config-field').each(function() {
+                values[$(this).attr('id')] = $(this).val();
+            });
+            config(values);
+            $('#notes').animate({opacity: 1}, 750);
             $(this).dialog('close');
         }
     },
-    close: function() {
-        var values = {};
-        $('.config-field').each(function() {
-            values[$(this).attr('id')] = $(this).val();
-        });
-        config(values);
+    hide: {
+        effect: 'fade',
+        duration: 100
     }
 });
