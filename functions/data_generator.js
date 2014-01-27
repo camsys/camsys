@@ -75,6 +75,7 @@ for (var i in asset_distribution) {
         usage: INTEGER (related to ridership)
     }
 *******************************/
+
 function generate_assets(n) {
     var csv = [];
     for (var i=0; i<n; i++) {

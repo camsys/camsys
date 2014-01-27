@@ -1,3 +1,16 @@
+var asset_class = {
+    bus: 'vehicle',
+    light_rail: 'vehicle',
+    street: 'infrastructure',
+    track: 'infrastructure',
+    building_utilities: 'infrastructure',
+    maintenance_building: 'infrastructure',
+    overhead: 'infrastructure',
+    parking: 'infrastructure',
+    systems: 'infrastructure',
+    utility_building: 'infrastructure'
+};
+
 var Asset = function(values) {
     /*******************************
         INTERNAL DATA
@@ -28,11 +41,12 @@ var Asset = function(values) {
     this.price = function (year) {
         return price * Math.pow(1.03, this.age(year));
     };
-    this.class = function () { return class_of_asset(type); };
+    this.class = function () { return asset_class[type]; };
     
     /*******************************
         GOOD REPAIR FUNCTIONS
     *******************************/
+    
     this.in_good_repair = function (year) {
         return TERM(type)(this.age(year)) >= 2.5;
     };

@@ -61,23 +61,3 @@ var TERM_module = function () {
 }
 
 var TERM = TERM_module();
-
-var classes_data = {
-    bus: 'vehicle',
-    light_rail: 'vehicle',
-    street: 'infrastructure',
-    track: 'infrastructure',
-    building_utilities: 'infrastructure',
-    maintenance_building: 'infrastructure',
-    overhead: 'infrastructure',
-    parking: 'infrastructure',
-    systems: 'infrastructure',
-    utility_building: 'infrastructure'
-};
-
-function class_of_asset(type) {
-    var t = type.toLowerCase();
-    while (t.indexOf(' ') >= 0)
-        t = t.replace(' ', '_');
-    return classes_data[t];
-}
