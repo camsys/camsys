@@ -11,7 +11,7 @@ var asset_distribution = {
     utility_building: 5
 };
 
-var asset_volume = {
+var asset_usage = {
     bus: 1000,
     light_rail: 2000,
     street: 500,
@@ -72,7 +72,7 @@ for (var i in asset_distribution) {
         type: STRING (type of asset)
         years: INTEGERS ARRAY (years of purchase/replacement)
         price: INTEGER
-        volume: INTEGER (related to ridership)
+        usage: INTEGER (related to ridership)
     }
 *******************************/
 function generate_assets(n) {
@@ -86,7 +86,7 @@ function generate_assets(n) {
                     type: j,
                     years: [random_integer(year_range[j])],
                     price: random_integer(price_range[j]),
-                    volume: asset_volume[j]
+                    usage: asset_usage[j]
                 });
             }
         }

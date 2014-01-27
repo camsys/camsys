@@ -1,4 +1,4 @@
-serial,type,years,price,volume
+serial,type,years,price,usage
 BUS0,bus,1990,108686,1000
 PARKING1,parking,1992,37080,100
 BUS2,bus,1997,108250,1000

@@ -5,10 +5,10 @@ var startYear = 1990,
     threshold = 80,
     yearly_budget = 10000000,
     weight_metric = function (asset, year) {
-        return SGR.raw_adjusted_cost(asset.type, year-asset.year(year), asset.price) * asset.volume;
+        return asset.price(year) * Math.log(asset.usage());
     },
     sunburst_function = function (asset, year) {
-        return SGR.replacement_cost(asset.type, year-asset.year(year), asset.price);
+        return asset.replacement_cost(year);
     },
     color_scheme = {
         total: '#393b79',

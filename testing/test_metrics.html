@@ -39,7 +39,7 @@
         var assets_table = assets_div.find('table');
         
         var measure = function(i) {
-            return cumulative_data[i].price * asset_volume[i];
+            return cumulative_data[i].price * Math.log(asset_volume[i]);
         }
         
         for (var i in cumulative_data) {

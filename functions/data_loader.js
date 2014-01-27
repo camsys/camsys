@@ -5,17 +5,9 @@ var load_data = function (csv) {
         DATA TRANSFORMATIONS
     *****************************/
     
-    // inject year fetcher function
+    // load as objects
     for (var i in csv) {
-        (function() {
-            var years_array = csv[i].years;
-            csv[i].year = function(y) {
-                var k = years_array.length-1;
-                while (years_array[k] >= y)
-                    k--;
-                return years_array[k];
-            };
-        })();
+        csv[i] = new Asset(csv[i]);
     }
     
     /*****************************
@@ -33,9 +25,9 @@ var load_data = function (csv) {
             for (var i in csv) {
                 var asset = csv[i];
                 var size = metric(asset);
-                var name = asset.serial;
-                var type = asset.type;
-                var clas = class_of_asset(type);
+                var name = asset.serial();
+                var type = asset.type();
+                var clas = asset.class();
                 if (!trim | size > 0) {
                     // add the class
                     var class_index = json_data.children.length;
@@ -104,14 +96,11 @@ var load_data = function (csv) {
         
         for (var i in csv) {
             var asset = csv[i];
-            var replacement_year = projected_lifespan(asset.type) + parseInt(asset.year(year));
+            var type = asset.type();
+            var replacement_year = asset.replacement_year(year);
             var measure = weight_metric(asset, year);
-            var raw_cost = SGR.raw_adjusted_cost(asset.type,
-                                                 year-parseInt(asset.year(year)),
-                                                 asset.price);
-            investment += SGR.replacement_cost(asset.type,
-                                               year-parseInt(asset.year(year)),
-                                               asset.price);
+            var raw_cost = asset.price(year);
+            investment += asset.replacement_cost(year);
             if (replacement_year === year) {
                 gmbb.bad += measure;
                 if (constrained) {
@@ -150,7 +139,7 @@ var load_data = function (csv) {
                     i--;
                 if (i < 0) break;
                 var replaced = queue.splice(i,1)[0];
-                replaced[0].years.push(year);
+                replaced[0].replace(year);
                 budget -= replaced[2];
             }
             
