@@ -92,7 +92,8 @@ var System = function (assets) {
     // percentages per year
     function GMBB(year, options) {
         var constrained = options.constrained;
-        var metric = options.metric;
+        var metric = options.metric || 1;
+        var query = options.query || function () { return true; };
         
         var investment= 0;
         var gmbb = {
@@ -113,6 +114,7 @@ var System = function (assets) {
         
         for (var i in assets) {
             var asset = assets[i];
+            if (!query(asset)) continue;
             var type = asset.type();
             var replacement_year = asset.replacement_year(year);
             var measure = metric(asset, year);

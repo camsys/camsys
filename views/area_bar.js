@@ -13,54 +13,39 @@ function area_bar(data) {
     var startingYear = Math.min(startYear, currentYear);
     var constrained = yearly_budget > 0;
     
+    // generate historical data
+    var historical_data = generate_history(startYear, currentYear-1, constrained);
+    
     // get projected data for future years
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
-    var yearly_gmbb_data = data.system_metric.gmbb(years, {constrained: constrained,
-                                                           metric: area_bar_metric});
+    var projected_data = data.system_metric.gmbb(years, {constrained: constrained,
+                                                         metric: area_bar_metric,
+                                                         query: function (asset) {
+                                                             return true;
+                                                         }});
     
-    // generate historical data
-    var historical_data = generate_history(startYear, currentYear-1, constrained);
-    
-    // merge the two datasets
-    data = [];
+    // set up layered data array
+    var layer_data = [];
     var index_mapping = {};
-    for (var i in yearly_gmbb_data) {
-        if (data.length === 0) {
-            var index = 0;
-            for (var k in yearly_gmbb_data[i]) {
-                if (k !== 'investment') {
-                    data.push([]);
-                    index_mapping[k] = index;
-                    index += 1;
-                }
-            }
-            for (var j in historical_data) {
-                for (var l in historical_data[j]) {
-                    if (l !== 'investment')
-                        data[index_mapping[l]].push([parseInt(j),
-                                                     historical_data[j][l],
-                                                     historical_data[j]['investment']]);
-                }
-            }
-        }
-        for (var j in index_mapping) {
-            data[index_mapping[j]].push([parseInt(i),
-                                         yearly_gmbb_data[i][j],
-                                         yearly_gmbb_data[i].investment]);
+    var index = 0;
+    for (var condition in projected_data[currentYear]) {
+        if (condition !== 'investment') {
+            layer_data.push([]);
+            index_mapping[condition] = index;
+            index += 1;
         }
     }
     
-    // translate data into stacked-bar layers format
-    var layer_data = [];
-    for (var i in data) {
-        layer_data.push([]);
-        for (var j in data[i]) {
-            layer_data[i].push({
-                x: data[i][j][0],
-                y: data[i][j][1]*100,
-                ry: data[i][j][2]
+    // merge datasets and transform into layered data array
+    var merged_data = $.extend({}, historical_data, projected_data);
+    for (var year in merged_data) {
+        for (var condition in index_mapping) {
+            layer_data[index_mapping[condition]].push({
+                x: parseInt(year),
+                y: merged_data[year][condition]*100,
+                ry: merged_data[year].investment
             });
         }
     }
