@@ -158,6 +158,7 @@ function sunburst(data) {
     }
     
     function click(d) {
+        area_bar_updater(d.name);
         path.transition()
             .duration(750)
             .attrTween("d", zoomTween(d));

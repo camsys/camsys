@@ -22,7 +22,7 @@ var System = function (assets) {
         
         // format data into the 'flare.json' format
         // found on many D3 examples
-        flare: function (metric, trim) {
+        flare: function (metric) {
             
             // define root
             var json_data = {
@@ -37,37 +37,35 @@ var System = function (assets) {
                 var type = asset.type();
                 var clas = asset.class();
                 
-                if (!trim | size > 0) {
-                    // add the class if not found
-                    var class_index = json_data.children.length;
-                    for (var j in json_data.children) {
-                        if (json_data.children[j].name === clas)
-                            class_index = j;
-                    }
-                    if (class_index === json_data.children.length)
-                        json_data.children.push({
-                            name: clas,
-                            children: []
-                        });
-                    
-                    // add the type if not found
-                    var type_index = json_data.children[class_index].children.length;
-                    for (var j in json_data.children[class_index].children) {
-                        if (json_data.children[class_index].children[j].name === type)
-                            type_index = j;
-                    }
-                    if (type_index === json_data.children[class_index].children.length)
-                        json_data.children[class_index].children.push({
-                            name: type,
-                            children: []
-                        });
-                    
-                    // add the asset
-                    json_data.children[class_index].children[type_index].children.push({
-                        name: name,
-                        size: size
-                    });
+                // add the class if not found
+                var class_index = json_data.children.length;
+                for (var j in json_data.children) {
+                    if (json_data.children[j].name === clas)
+                        class_index = j;
                 }
+                if (class_index === json_data.children.length)
+                    json_data.children.push({
+                        name: clas,
+                        children: []
+                    });
+                
+                // add the type if not found
+                var type_index = json_data.children[class_index].children.length;
+                for (var j in json_data.children[class_index].children) {
+                    if (json_data.children[class_index].children[j].name === type)
+                        type_index = j;
+                }
+                if (type_index === json_data.children[class_index].children.length)
+                    json_data.children[class_index].children.push({
+                        name: type,
+                        children: []
+                    });
+                
+                // add the asset
+                json_data.children[class_index].children[type_index].children.push({
+                    name: name,
+                    size: size
+                });
             }
             
             // format the name field
