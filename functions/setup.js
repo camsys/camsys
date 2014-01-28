@@ -1,14 +1,16 @@
-// DEFAULT CONFIG
+/******************
+    DEFAULTS
+******************/
 
 var startYear = 1990,
     currentYear = 2013,
     endYear = 2020,
     threshold = 80,
     yearly_budget = 10000000,
-    weight_metric = function (asset, year) {
+    area_bar_metric = function (asset, year) {
         return asset.price(year) * Math.log(asset.usage());
     },
-    sunburst_function = function (asset, year) {
+    sunburst_metric = function (asset, year) {
         return asset.replacement_cost(year);
     },
     color_scheme = {
@@ -27,9 +29,13 @@ var startYear = 1990,
         light_rail: '#969696'
     };
 
-// MODAL CONFIG FUNCTION
+/******************
+    CONFIG FUNCTION
+******************/
 
 function config(values) {
+    
+    // evaluate each config option
     for (var i in values) {
         try {
             eval(i+' = '+values[i]+' || '+i);
@@ -38,17 +44,19 @@ function config(values) {
         }
     }
 
+    // load and display data
     var data = load_data(sample_data);
-        
     area_bar(data);
     sunburst(data);
     
+    // track detail tooltips
     $('#visuals').tooltip({
         track: true,
         show: false,
         hide: false
     });
     
+    // preserve aspect ratio on resize
     $(window).on('resize', function() {
         $('#area_bar').css('height', $('#area_bar').width()/5*3);
         $('#sunburst').css('height', $('#area_bar').height());
@@ -59,9 +67,10 @@ function config(values) {
     MODAL SETUP
 ******************/
 
+// initial hide
 $('#notes').css('opacity', 0);
 
-// display default values
+// display default values in input boxes
 $('#config-form input').each(function() {
     $(this).attr('value', eval($(this).attr('id'))+'');
 });
@@ -76,10 +85,13 @@ $('#config-form').dialog({
     buttons: {
         Okay: function() {
             var values = {};
+            
+            // read values and configure
             $('.config-field').each(function() {
                 values[$(this).attr('id')] = $(this).val();
             });
             config(values);
+            
             $('#notes').animate({opacity: 1}, 750);
             $(this).dialog('close');
         }

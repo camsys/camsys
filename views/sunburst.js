@@ -13,7 +13,7 @@ function sunburst(data) {
     ************************/
         
     var root = data.format.flare(function (asset) {
-        return sunburst_function(asset, currentYear);
+        return sunburst_metric(asset, currentYear);
     });
     
     var old = {};
@@ -146,7 +146,7 @@ function sunburst(data) {
     sunburst_updater = function(year) {
         if (year >= currentYear) {
             root = data.format.flare(function (asset) {
-                return sunburst_function(asset, year);
+                return sunburst_metric(asset, year);
             });
             partitioned = partition.nodes(root);
             path.data(partitioned)

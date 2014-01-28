@@ -17,7 +17,8 @@ function area_bar(data) {
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
-    var yearly_gmbb_data = data.system_metric.gmbb(years, {constrained: constrained});
+    var yearly_gmbb_data = data.system_metric.gmbb(years, {constrained: constrained,
+                                                           metric: area_bar_metric});
     
     // generate historical data
     var historical_data = generate_history(startYear, currentYear-1, constrained);
