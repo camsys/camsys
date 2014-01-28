@@ -11,7 +11,7 @@ var startYear = 1990,
         return asset.price(year) * Math.log(asset.usage());
     },
     sunburst_metric = function (asset, year) {
-        return asset.replacement_cost(year);
+        return asset.amount_invested(year);
     },
     color_scheme = {
         total: '#393b79',

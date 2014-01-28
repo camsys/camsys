@@ -71,7 +71,7 @@ for (var i in asset_distribution) {
         serial: STRING (unique ID)
         type: STRING (type of asset)
         years: INTEGERS ARRAY (years of purchase/replacement)
-        price: INTEGER
+        prices: INTEGER ARRAY (same length as years, prices of purchases)
         usage: INTEGER (related to ridership)
     }
 *******************************/
@@ -86,7 +86,7 @@ function generate_assets(n) {
                     serial: j.toUpperCase()+i,
                     type: j,
                     years: [random_integer(year_range[j])],
-                    price: random_integer(price_range[j]),
+                    prices: [random_integer(price_range[j])],
                     usage: asset_usage[j]
                 });
             }
@@ -107,7 +107,7 @@ function generate_history(start, end, constrained) {
             marginal: marginal,
             bad: bad,
             backlog: backlog,
-            investment: constrained ? yearly_budget*(1.5-good) : 80000000*(1.2-good)
+            investment: constrained ? yearly_budget*(1.5-good) : 10000000*(1.2-good)
         };
     }
     return yearly_data;

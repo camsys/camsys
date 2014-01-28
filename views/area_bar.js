@@ -11,7 +11,7 @@ function area_bar(data) {
     
     // set the starting x value and constraint
     var startingYear = Math.min(startYear, currentYear);
-    var constrained = yearly_budget > 0;
+    var constrained = yearly_budget < Infinity;
     
     // generate historical data
     var historical_data = generate_history(startYear, currentYear-1, constrained);
@@ -60,6 +60,7 @@ function area_bar(data) {
         layers = stack(d3.range(n).map(function(i) { return layer_data[i]; })),
         yMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); }),
         ryMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.ry; }); });
+    
     ryMax = constrained ? yearly_budget : ryMax;
     
     var margin = {top: 40, right: 60, bottom: 20, left: 40},
@@ -271,7 +272,7 @@ function area_bar(data) {
     var flat_line = d3.svg.line()
         .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
         .y(function(d) { return height; })
-        .interpolate('basis');
+        .interpolate('cardinal');
     
     var division_line = d3.svg.line()
         .x(function(d) { return xScale(currentYear) - 1; })
@@ -280,7 +281,7 @@ function area_bar(data) {
     var investment_line = d3.svg.line()
         .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
         .y(function(d) { return ryScale(d.ry); })
-        .interpolate('basis');
+        .interpolate('cardinal');
     
     var trajectory_line = d3.svg.line()
         .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })

@@ -95,12 +95,12 @@ var System = function (assets) {
         var metric = options.metric || 1;
         var query = options.query || function () { return true; };
         
-        var investment= 0;
         var gmbb = {
-            good: 0.,
-            marginal: 0.,
-            bad: 0.,
-            backlog: 0.
+            good: 0,
+            marginal: 0,
+            bad: 0,
+            backlog: 0,
+            investment: 0
         };
         
         var bad_queue = [];
@@ -120,26 +120,18 @@ var System = function (assets) {
             var measure = metric(asset, year);
             var raw_cost = asset.price(year);
             
-            investment += asset.replacement_cost(year);
-            
             // determine state of repair by proximity to replacement year
             if (replacement_year === year) {
                 gmbb.bad += measure;
-                if (constrained) {
-                    bad_queue.push([asset, measure, raw_cost]);
-                }
+                bad_queue.push([asset, measure, raw_cost]);
             }
             else if (replacement_year < year) {
                 gmbb.backlog += measure;
-                if (constrained) {
-                    backlog_queue.push([asset, measure, raw_cost]);
-                }
+                backlog_queue.push([asset, measure, raw_cost]);
             }
             else if (replacement_year === year + 1) {
                 gmbb.marginal += measure;
-                if (constrained) {
-                    marginal_queue.push([asset, measure, raw_cost]);
-                }
+                marginal_queue.push([asset, measure, raw_cost]);
             }
             else
                 gmbb.good += measure;
@@ -151,31 +143,24 @@ var System = function (assets) {
         
         // clear as much investment as possible
         // using bad-marginal-backlog queue order
-        if (constrained) {
-            var budget = yearly_budget;
+        bad_queue.sort(compare);
+        backlog_queue.sort(compare);
+        marginal_queue.sort(compare);
+        var queue = constrained
+            ? backlog_queue.concat(marginal_queue.concat(bad_queue))
+            : backlog_queue;
+        var budget = yearly_budget;
+        while (budget > 0 && queue.length > 0) {
+            var i = queue.length-1;
+            while (i >= 0 && queue[i][2] > budget)
+                i--; // skip over investments greater than available budget
+            if (i < 0) break; // all possible investments made\
             
-            bad_queue.sort(compare);
-            backlog_queue.sort(compare);
-            marginal_queue.sort(compare);
-            
-            var queue = backlog_queue.concat(marginal_queue.concat(bad_queue));
-            
-            while (budget > 0 && queue.length > 0) {
-                var i = queue.length-1;
-                while (i >= 0 && queue[i][2] > budget)
-                    i--; // skip over investments greater than available budget
-                if (i < 0) break; // all possible investments made\
-                
-                // replace asset
-                var replaced = queue.splice(i,1)[0];
-                replaced[0].replace(year);
-                budget -= replaced[2];
-            }
-            // calculate total investment
-            gmbb.investment = yearly_budget - budget;
-        }
-        else {
-            gmbb.investment = investment;
+            // replace asset
+            var replaced = queue.splice(i,1)[0];
+            replaced[0].replace(year);
+            budget -= replaced[2];
+            gmbb.investment += replaced[2];
         }
         
         return gmbb;

@@ -18,30 +18,43 @@ var Asset = function(values) {
     
     var type = values.type.toLowerCase().replace(/[ ]+/,'_');
     var serial = values.serial.replace(/[ ]+/,'');
-    var price = parseInt(values.price);
+    var prices = values.prices;
     var years = values.years;
-    for (var i in years)
+    for (var i in years) {
         years[i] = parseInt(years[i]);
+        prices[i] = parseInt(prices[i]);
+    }
     var usage = parseInt(values.usage);
     
     /*******************************
         DATA GETTERS/SETTERS
     *******************************/
     
-    this.serial = function () { return serial; };
-    this.type = function () { return type; };
-    this.usage = function () { return usage; };
-    this.replace = function (year, cost) { years.push(year); price = cost || price; };
-    this.age = function (year) {
+    function yearIndex(year) {
         var index = years.length-1;
         while (year - years[index] < 0)
             index--;
-        return year - years[index];
+        return index;
+    }
+    
+    this.serial = function () { return serial; };
+    this.type = function () { return type; };
+    this.class = function () { return asset_class[type]; };
+    this.usage = function () { return usage; };
+    this.age = function (year) {
+        return year - years[yearIndex(year)];
     };
     this.price = function (year) {
-        return price * Math.pow(1.03, this.age(year));
+        return prices[yearIndex(year)] * Math.pow(1.03, this.age(year));
     };
-    this.class = function () { return asset_class[type]; };
+    this.amount_invested = function (year) {
+        var i = years.indexOf(year);
+        return i < 0 ? 0 : prices[i];
+    };
+    this.replace = function (year, cost) {
+        prices.push(cost || this.price(year));
+        years.push(year);
+    };
     
     /*******************************
         GOOD REPAIR FUNCTIONS
