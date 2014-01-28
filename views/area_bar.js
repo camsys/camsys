@@ -21,22 +21,20 @@ function area_bar(data) {
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
     var projected_data = data.system_metric.gmbb(years, {constrained: constrained,
-                                                         metric: area_bar_metric,
-                                                         query: function (asset) {
-                                                             return true;
-                                                         }});
+                                                         metric: area_bar_metric});
     
     // set up layered data array
     var layer_data = [];
     var index_mapping = {};
     var index = 0;
     for (var condition in projected_data[currentYear]) {
-        if (condition !== 'investment') {
+        if (['investment', 'children'].indexOf(condition) < 0) {
             layer_data.push([]);
             index_mapping[condition] = index;
             index += 1;
         }
     }
+    console.log(projected_data[currentYear].children);
     
     // merge datasets and transform into layered data array
     var merged_data = $.extend({}, historical_data, projected_data);
@@ -194,7 +192,7 @@ function area_bar(data) {
     ry_axis.append("text")
         .style("text-anchor", "middle")
         .attr("transform", "rotate(90) translate(" + height/2 + "," + -0.75*margin.right + ")")
-        .text("$ Investment Needed");
+        .text("$ Investment");
     
     /************************
         LEGENDS SETUP

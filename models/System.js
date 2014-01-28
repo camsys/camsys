@@ -93,15 +93,15 @@ var System = function (assets) {
     function GMBB(year, options) {
         var constrained = options.constrained;
         var metric = options.metric || 1;
-        var query = options.query || function () { return true; };
         
-        var gmbb = {
+        var template = {
             good: 0,
             marginal: 0,
             bad: 0,
             backlog: 0,
             investment: 0
         };
+        var gmbb = $.extend({}, template, {children:{}});
         
         var bad_queue = [];
         var backlog_queue = [];
@@ -114,42 +114,64 @@ var System = function (assets) {
         
         for (var i in assets) {
             var asset = assets[i];
-            if (!query(asset)) continue;
+            
+            var serial = asset.serial();
             var type = asset.type();
+            var clas = asset.class();
+            
+            if (gmbb.children[clas] === undefined)
+                gmbb.children[clas] = $.extend({}, template, {children:{}});
+            if (gmbb.children[clas].children[type] === undefined)
+                gmbb.children[clas].children[type] = $.extend({}, template, {children:{}});
+            gmbb.children[clas].children[type].children[serial] = $.extend({}, template);
+            
             var replacement_year = asset.replacement_year(year);
             var measure = metric(asset, year);
             var raw_cost = asset.price(year);
+            var condition;
             
             // determine state of repair by proximity to replacement year
             if (replacement_year === year) {
-                gmbb.bad += measure;
+                condition= 'bad';
                 bad_queue.push([asset, measure, raw_cost]);
             }
             else if (replacement_year < year) {
-                gmbb.backlog += measure;
+                condition= 'backlog';
                 backlog_queue.push([asset, measure, raw_cost]);
             }
             else if (replacement_year === year + 1) {
-                gmbb.marginal += measure;
+                condition= 'marginal';
                 marginal_queue.push([asset, measure, raw_cost]);
             }
             else
-                gmbb.good += measure;
+                condition= 'good';
+            gmbb[condition] += measure;
+            gmbb.children[clas][condition] += measure;
+            gmbb.children[clas].children[type][condition] += measure;
+            gmbb.children[clas].children[type].children[serial][condition] += measure;
         }
         
         // normalize
-        var total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
-        for (var i in gmbb) gmbb[i] /= total;
+        function normalize(node) {
+            var total = node.good + node.bad + node.marginal + node.backlog;
+            node.good /= total; node.bad /= total; node.marginal /= total; node.backlog /= total;
+            for (var child in node.children)
+                normalize(node.children[child]);
+        }
+        normalize(gmbb);
         
         // clear as much investment as possible
         // using bad-marginal-backlog queue order
         bad_queue.sort(compare);
         backlog_queue.sort(compare);
         marginal_queue.sort(compare);
+        
         var queue = constrained
             ? backlog_queue.concat(marginal_queue.concat(bad_queue))
             : backlog_queue;
+        
         var budget = yearly_budget;
+        
         while (budget > 0 && queue.length > 0) {
             var i = queue.length-1;
             while (i >= 0 && queue[i][2] > budget)
@@ -158,9 +180,17 @@ var System = function (assets) {
             
             // replace asset
             var replaced = queue.splice(i,1)[0];
-            replaced[0].replace(year);
-            budget -= replaced[2];
-            gmbb.investment += replaced[2];
+            var asset = replaced[0];
+            var serial = asset.serial();
+            var type = asset.type();
+            var clas = asset.class();
+            var cost = replaced[2];
+            asset.replace(year);
+            budget -= cost;
+            gmbb.investment += cost;
+            gmbb.children[clas].investment += cost;
+            gmbb.children[clas].children[type].investment += cost;
+            gmbb.children[clas].children[type].children[serial].investment += cost;
         }
         
         return gmbb;
