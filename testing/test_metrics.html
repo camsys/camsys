@@ -38,6 +38,8 @@
         
         var assets_table = assets_div.find('table');
         
+        var width = function() { return assets_table.width(); };
+        
         var measure = function(i) {
             return cumulative_data[i].price * Math.log(asset_usage[i]);
         }
@@ -56,11 +58,11 @@
         var total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
         for (var i in gmbb) gmbb[i] /= total;
         
-        var svg = '<svg width=800 height=20>';
+        var svg = '<svg width='+width()+' height=20>';
         var x=0;
         for (var i in gmbb) {
-            svg += '<rect width='+gmbb[i]*800+' height=20 x='+x+' style="fill: '+color[i]+'"/>';
-            x += gmbb[i]*800;
+            svg += '<rect width='+gmbb[i]*width()+' height=20 x='+x+' style="fill: '+color[i]+'"/>';
+            x += gmbb[i]*width();
         }
         svg += '</svg>';
         metric_div.html(svg);
@@ -87,11 +89,11 @@
                     }
                      total = gmbb.good + gmbb.bad + gmbb.marginal + gmbb.backlog;
                     for (var i in gmbb) gmbb[i] /= total;
-                    svg = '<svg width=800 height=20>';
+                    svg = '<svg width='+width()+' height=20>';
                     x=0;
                     for (var i in gmbb) {
-                        svg += '<rect width='+gmbb[i]*800+' height=20 x='+x+' style="fill: '+color[i]+'"/>';
-                        x += gmbb[i]*800;
+                        svg += '<rect width='+gmbb[i]*width()+' height=20 x='+x+' style="fill: '+color[i]+'"/>';
+                        x += gmbb[i]*width();
                     }
                     svg += '</svg>';
                     metric_div.html(svg);

@@ -6,6 +6,7 @@ function sunburst(data) {
     var container = d3.select('#sunburst');
     var jqcontainer = $('#sunburst');
     var title = $('#title');
+    jqcontainer.css('height', $('#area_bar').height());
     
     /************************
         DATA SETUP
@@ -24,7 +25,7 @@ function sunburst(data) {
     var padding = 25;
     
     var width = jqcontainer.width(),
-        height = $('#area_bar').height(),
+        height = jqcontainer.height(),
         radius = Math.min(width, height) / 2 - 2 * padding;
     
     // default domain [0,1]
@@ -67,8 +68,7 @@ function sunburst(data) {
     ************************/
     
     var svg = container.append("svg")
-        .attr("width", width)
-        .attr("height", height)
+        .attr('viewBox', '0 0 '+width+' '+height)
       .append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
         .attr("title",'...');
@@ -99,8 +99,6 @@ function sunburst(data) {
     
     var legend = container.append('div')
         .attr('class', 'legend floating')
-        .style('left', jqcontainer.offset().left+'px')
-        .style('top', jqcontainer.offset().top+padding+'px');
     legend.append('ul').selectAll('li')
         .data(d3.keys(color_scheme))
         .enter().append('li')
@@ -128,10 +126,8 @@ function sunburst(data) {
     var legend_toggle = container.append('img')
         .attr('class', 'toggle floating')
         .attr('src', 'images/list.png')
-        .attr('width', width/10)
-        .attr('height', width/10)
-        .style('top', jqcontainer.offset().top+10+'px')
-        .style('left', jqcontainer.offset().left+width*9/10+'px')
+        .attr('width', '5%')
+        .style('left', '95%')
         .on('click', toggle_legend);
     
     /************************
@@ -174,14 +170,9 @@ function sunburst(data) {
     }
     
     function toggle_legend() {
-        if (legend.style('top') === '10px')
-            legend.transition().ease('cubic-out')
-                .style('top', jqcontainer.offset().top+padding+'px')
-                .style('visibility', 'hidden');
-        else
-            legend.transition().ease('cubic-out')
-                .style('top', '10px')
-                .style('visibility', 'visible');
+        legend.transition().ease('cubic-out')
+            .style('opacity', legend.style('opacity') == 0 ? 1 : 0)
+            .style('pointer-events', legend.style('opacity') == 0 ? 'auto' : 'none');
     }
     
     function yearTween(a) {

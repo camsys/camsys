@@ -20,11 +20,17 @@
         <script src="views/area_bar.js"></script>
     </head>
     <body>
+        
+        <!-- PRIMARY VISUALIZATION -->
+        
         <div id='title'></div>
         <div id='visuals'>
             <div id="area_bar"></div>
             <div id="sunburst"></div>
         </div>
+        
+        <!-- NOTES -->
+        
         <div id='notes'>
             <div id='notes-left'>
                 <ul>
@@ -46,6 +52,9 @@
                 </ul>
             </div>
         </div>
+        
+        <!-- CONFIG DIALOG -->
+        
         <div id="config-form" title="Configuration">
             <form>
                 <label>How far back? (year to begin accounting for historical data)</label>
@@ -58,6 +67,9 @@
                 <input class="config-field" type="text" id="yearly_budget">
             </form>
         </div>
+        
+        <!-- SETUP -->
+        
         <script src="functions/setup.js"></script>
     </body>
 </html>

@@ -1,4 +1,5 @@
 // DEFAULT CONFIG
+
 var startYear = 1990,
     currentYear = 2013,
     endYear = 2020,
@@ -27,6 +28,7 @@ var startYear = 1990,
     };
 
 // MODAL CONFIG FUNCTION
+
 function config(values) {
     for (var i in values) {
         try {
@@ -36,18 +38,7 @@ function config(values) {
         }
     }
 
-//    var data = load_data(generate_assets(100));
     var data = load_data(sample_data);
-//    d3.csv('http://web.mit.edu/lu16j/www/camsys/sample_data.csv', function(csv) {
-//        
-//        for (var i in csv) {
-//            csv[i].years = csv[i].years.split(',');
-//            for (var j in csv[i].years) csv[i].years[j] = parseInt(csv[i].years[j]);
-//            csv[i].price = parseInt(csv[i].price);
-//            csv[i].volume = parseInt(csv[i].volume);
-//        }
-//        
-//        var data = load_data(csv);
         
     area_bar(data);
     sunburst(data);
@@ -57,8 +48,11 @@ function config(values) {
         show: false,
         hide: false
     });
-        
-//    });
+    
+    $(window).on('resize', function() {
+        $('#area_bar').css('height', $('#area_bar').width()/5*3);
+        $('#sunburst').css('height', $('#area_bar').height());
+    });
 }
 
 /******************

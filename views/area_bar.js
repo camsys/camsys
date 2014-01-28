@@ -82,7 +82,7 @@ function area_bar(data) {
     
     var xScale = d3.scale.ordinal()
         .domain(d3.range(startingYear, endYear+1))
-        .rangeRoundBands([0, width], .08);
+        .rangeRoundBands([0, width], .06);
     
     var yScale = d3.scale.linear()
         .domain([0, yMax])
@@ -120,15 +120,15 @@ function area_bar(data) {
         .tickPadding(2)
         .orient("left");
     
-    var money_levels = 'KMBT'; // monetary abbreviations
+    var money_levels = ' KMBT'; // monetary abbreviations
     var ryAxis = d3.svg.axis()
         .scale(ryScale)
         .tickSize(5)
         .tickPadding(2)
         .tickFormat(function(d) {
             for (var i=0; i<money_levels.length; i++)
-                if (d/Math.pow(1000,i+1) < 1000)
-                    return d/Math.pow(1000,i+1) + money_levels[i];
+                if (d/Math.pow(1000,i) < 1000)
+                    return d/Math.pow(1000,i) + money_levels[i];
             return '???';
         })
         .orient("right");
@@ -138,8 +138,7 @@ function area_bar(data) {
     ************************/
     
     var svg = container.append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + 2*margin.bottom)
+        .attr('viewBox', '0 0 '+jqcontainer.width()+' '+jqcontainer.height())
         .attr("title", "...")
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
