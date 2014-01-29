@@ -271,7 +271,7 @@ function area_bar(data) {
     var flat_line = d3.svg.line()
         .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
         .y(function(d) { return height; })
-        .interpolate('cardinal');
+        .interpolate('monotone');
     
     var division_line = d3.svg.line()
         .x(function(d) { return xScale(currentYear) - 1; })
@@ -280,7 +280,7 @@ function area_bar(data) {
     var investment_line = d3.svg.line()
         .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })
         .y(function(d) { return ryScale(d.ry); })
-        .interpolate('cardinal');
+        .interpolate('monotone');
     
     var trajectory_line = d3.svg.line()
         .x(function(d) { return xScale(d.x) + xScale.rangeBand() / 2; })

@@ -135,10 +135,8 @@ function sunburst(data) {
     populate(legend.append('ul').attr('class', 'root'), root);
     
     var legend_toggle = container.append('img')
-        .attr('class', 'toggle floating')
         .attr('src', 'images/list.png')
-        .attr('width', '5%')
-        .style('left', '95%')
+        .attr('class', 'toggle floating')
         .on('click', toggle_legend);
     
     /************************

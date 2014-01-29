@@ -64,12 +64,16 @@ body {
     position: absolute;
 }
 
+#sunburst .toggle {
+    width: 5%;
+    left: 95%;
+}
+
 #sunburst .toggle:hover {
     opacity: 0.7;
 }
 
 #sunburst .legend {
-    padding: 10px 0;
     background-color: rgba(255,255,255,0.8);
     top: 1%;
     left: 59%;
@@ -99,7 +103,7 @@ body {
     white-space: nowrap;
 }
 
-#sunburst .legend .root {
+#sunburst .legend li.root {
     width: 98%;
 }
 
