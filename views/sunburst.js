@@ -18,6 +18,8 @@ function sunburst(data) {
     
     var old = {};
     
+    var displayedYear = currentYear;
+    
     /************************
         D3 SETUP
     ************************/
@@ -87,15 +89,14 @@ function sunburst(data) {
             };
         })
         .style("fill", arcColor)
-        .on("click", click)
+        .on("click", zoom)
         .on("mousemove", update_tooltip);
     
     /************************
         LEGENDS SETUP
     ************************/
     
-    title.html('<h2>'+currentYear+'</h2>'
-               +'<p>'+format_dollars(partitioned[0].value)+'</p>');
+    // recursively populate hierarchical legend
     
     function populate(ul, node) {
         var child = ul.append('li')
@@ -113,7 +114,7 @@ function sunburst(data) {
                 console.log(node.name);
                 svg.select('.'+node.name).each(function(d) {
                     if (d.dx > 0)
-                        click(d);
+                        zoom(d);
                 });
             });
         child.append('svg').attr('width', 10).attr('height', 10)
@@ -152,30 +153,39 @@ function sunburst(data) {
         UPDATE FUNCTIONS
     ************************/
     
-    var zoomed_in = 'total';
+    var zoomed_name = 'total';
+    var zoomed_node = partitioned[0];
     
     sunburst_updater = function(year) {
         if (year >= currentYear) {
+            displayedYear = year;
             root = data.format.flare(function (asset) {
                 return sunburst_metric(asset, year);
             });
             partitioned = partition.nodes(root);
-            var zoomed_node;
             path.data(partitioned)
-                .each(function(d) { zoomed_node = d.name === zoomed_in ? d : zoomed_node; })
+                .each(function(d) { zoomed_node = d.name === zoomed_name ? d : zoomed_node; })
                 .transition().duration(500).ease('cubic-out')
                 .attrTween('d', attrTween(zoomed_node));
-            title.html('<h2>'+year+'</h2>'
-                   +'<p>'+format_dollars(partitioned[0].value)+'</p>');
+            update_title();
         }
     }
     
-    function click(d) {
-        zoomed_in = d.name;
+    function update_title() {
+        title.html('<h2>'+displayedYear+'</h2>'
+               +'<p>'+zoomed_name+': '+format_dollars(zoomed_node.value)+'</p>');
+    }
+    
+    update_title();
+    
+    function zoom(d) {
+        zoomed_name = d.name;
+        zoomed_node = d;
         area_bar_updater(d.name);
         path.transition()
             .duration(500).ease('cubic-out')
             .attrTween("d", attrTween(d));
+        update_title();
     }
     
     function update_tooltip(d) {
@@ -191,11 +201,15 @@ function sunburst(data) {
     }
     
     function attrTween(d) {
+        // interpolate the scales for zooming
         var xd = d3.interpolate(xScale.domain(), [d.x, d.x + d.dx]),
             yd = d3.interpolate(yScale.domain(), [d.y, 1]),
             yr = d3.interpolate(yScale.range(), [d.y ? 20 : 0, radius]);
+        
         return function(d, i) {
+            // interpolate the coordinates year to year
             var interpolate = d3.interpolate(old[d.name], d);
+            
             return i
                 ? function(t) {
                         var b = interpolate(t);
