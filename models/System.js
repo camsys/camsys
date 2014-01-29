@@ -1,4 +1,4 @@
-var System = function (assets) {
+var System = function (original_assets) {
         
     // runs a given function over multiple years
     function per_year(func, years, options) {
@@ -30,8 +30,8 @@ var System = function (assets) {
                 children: []
             };
             
-            for (var i in assets) {
-                var asset = assets[i];
+            for (var i in original_assets) {
+                var asset = original_assets[i];
                 var size = metric(asset);
                 var name = asset.serial();
                 var type = asset.type();
@@ -89,8 +89,10 @@ var System = function (assets) {
     // calculates the good/marginal/bad/backlog
     // percentages per year
     function GMBB(year, options) {
-        var constrained = options.constrained;
+        var budget = options.budget;
+        var constrained = budget !== undefined;
         var metric = options.metric || 1;
+        var assets = options.assets || original_assets;
         
         var template = {
             good: 0,
@@ -175,8 +177,6 @@ var System = function (assets) {
             ? backlog_queue.concat(marginal_queue.concat(bad_queue))
             : backlog_queue;
         
-        var budget = yearly_budget;
-        
         while (budget > 0 && queue.length > 0) {
             var i = queue.length-1;
             while (i >= 0 && queue[i].cost > budget)
@@ -205,5 +205,15 @@ var System = function (assets) {
         gmbb: function (years, options) {
             return per_year(GMBB, years, options);
         }
+    };
+    
+    /*****************************
+        OPTIMIZATION FUNCTIONS
+    *****************************/
+    
+    this.budget_to_clear_by = function (year) {
+    };
+    
+    this.years_to_clear_with = function (budget) {
     };
 }

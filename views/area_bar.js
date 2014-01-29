@@ -22,7 +22,7 @@ function area_bar(data) {
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
-    var projected_data = data.system_metric.gmbb(years, {constrained: constrained,
+    var projected_data = data.system_metric.gmbb(years, {budget: yearly_budget,
                                                          metric: area_bar_metric});
     
     // set up layered data array
