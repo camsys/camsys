@@ -97,31 +97,42 @@ function sunburst(data) {
     title.html('<h2>'+currentYear+'</h2>'
                +'<p>'+format_dollars(partitioned[0].value)+'</p>');
     
-    var legend = container.append('div')
-        .attr('class', 'legend floating')
-    legend.append('ul').selectAll('li')
-        .data(d3.keys(color_scheme))
-        .enter().append('li')
-        .attr('class', function(d) { return d.replace(' ','_'); })
-        .on('mouseover', function(d) {
-            d3.select(this).classed('highlighted', true);
-        })
-        .on('mouseleave', function(d) {
-            d3.select(this).classed('highlighted', false);
-        })
-        .on('click', function(d) {
-            svg.select('.'+d).each(function(d) {
-                if (d.dx > 0)
-                    click(d);
+    function populate(ul, node) {
+        var child = ul.append('li')
+            .classed(node.name, true)
+            .classed('leaf', true)
+            .classed('root', ul.classed('root'))
+            .on('mouseover', function() {
+                d3.select(this).classed('highlighted', true);
+            })
+            .on('mouseleave', function() {
+                d3.select(this).classed('highlighted', false);
+            })
+            .on('click', function() {
+                d3.event.stopPropagation();
+                console.log(node.name);
+                svg.select('.'+node.name).each(function(d) {
+                    if (d.dx > 0)
+                        click(d);
+                });
             });
-        })
-        .append('svg').attr('width', 10).attr('height', 10)
-        .append('rect').attr('width', 10).attr('height', 10)
-        .attr('fill',function(d) { return color_scheme[d]; });
-    legend.selectAll('li')
-        .append('text')
-        .text(function(d) { return ' '+d.replace('_',' '); })
-        .style('color', function(d) { return color_scheme[d]; });
+        child.append('svg').attr('width', 10).attr('height', 10)
+            .append('rect').attr('width', 10).attr('height', 10)
+            .attr('fill', color_scheme[node.name]);
+        child.append('text')
+            .text(' '+node.name)
+            .style('color', color_scheme[node.name]);
+        for (var i in node.children) {
+            if (node.children[i].children) {
+                child.classed('leaf', false);
+                populate(child.append('ul'), node.children[i]);
+            }
+        }
+    }
+    
+    var legend = container.append('div')
+        .attr('class', 'legend floating');
+    populate(legend.append('ul').attr('class', 'root'), root);
     
     var legend_toggle = container.append('img')
         .attr('class', 'toggle floating')
@@ -141,25 +152,30 @@ function sunburst(data) {
         UPDATE FUNCTIONS
     ************************/
     
+    var zoomed_in = 'total';
+    
     sunburst_updater = function(year) {
         if (year >= currentYear) {
             root = data.format.flare(function (asset) {
                 return sunburst_metric(asset, year);
             });
             partitioned = partition.nodes(root);
+            var zoomed_node;
             path.data(partitioned)
+                .each(function(d) { zoomed_node = d.name === zoomed_in ? d : zoomed_node; })
                 .transition().duration(500).ease('cubic-out')
-                .attrTween("d", yearTween);
+                .attrTween('d', attrTween(zoomed_node));
             title.html('<h2>'+year+'</h2>'
                    +'<p>'+format_dollars(partitioned[0].value)+'</p>');
         }
     }
     
     function click(d) {
+        zoomed_in = d.name;
         area_bar_updater(d.name);
         path.transition()
-            .duration(750).ease('cubic-out')
-            .attrTween("d", zoomTween(d));
+            .duration(500).ease('cubic-out')
+            .attrTween("d", attrTween(d));
     }
     
     function update_tooltip(d) {
@@ -174,30 +190,35 @@ function sunburst(data) {
             .style('pointer-events', legend.style('opacity') == 0 ? 'auto' : 'none');
     }
     
-    function yearTween(a) {
-        var i = d3.interpolate(old[a.name], a);
-        return function(t) {
-            var b = i(t);
-            old[a.name] = {
-                x: b.x,
-                y: b.y,
-                dx: b.dx,
-                dy: b.dy
-            };
-            return arc(b);
-        };
-    }
-    
-    function zoomTween(d) {
+    function attrTween(d) {
         var xd = d3.interpolate(xScale.domain(), [d.x, d.x + d.dx]),
             yd = d3.interpolate(yScale.domain(), [d.y, 1]),
             yr = d3.interpolate(yScale.range(), [d.y ? 20 : 0, radius]);
         return function(d, i) {
+            var interpolate = d3.interpolate(old[d.name], d);
             return i
-                ? function(t) { return arc(d); }
-                : function(t) { xScale.domain(xd(t));
-                                yScale.domain(yd(t)).range(yr(t));
-                                return arc(d); };
+                ? function(t) {
+                        var b = interpolate(t);
+                        old[d.name] = {
+                            x: b.x,
+                            y: b.y,
+                            dx: b.dx,
+                            dy: b.dy
+                        };
+                        return arc(b);
+                    }
+                : function(t) {
+                        xScale.domain(xd(t));
+                        yScale.domain(yd(t)).range(yr(t));
+                        var b = interpolate(t);
+                        old[d.name] = {
+                            x: b.x,
+                            y: b.y,
+                            dx: b.dx,
+                            dy: b.dy
+                        };
+                        return arc(b);
+                    };
         };
     }
 }

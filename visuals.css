@@ -79,6 +79,7 @@ body {
     overflow: hidden;
     font-size: 0.8em;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 #sunburst .legend ul {
@@ -88,10 +89,23 @@ body {
 }
 
 #sunburst .legend li {
-    width: 50%;
+    padding: 1%;
+    width: 48%;
     float: left;
     transition: all 0.1s linear;
     border-radius: 5px;
+    overflow: hidden;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#sunburst .legend .root {
+    width: 98%;
+}
+
+#sunburst .legend .leaf {
+    text-align: left;
+    font-weight: normal;
 }
 
 #sunburst .legend .highlighted {
