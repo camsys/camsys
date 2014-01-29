@@ -89,7 +89,7 @@ var System = function (original_assets) {
     // calculates the good/marginal/bad/backlog
     // percentages per year
     function GMBB(year, options) {
-        var budget = options.budget;
+        var budget = options.budget || Infinity;
         var constrained = budget !== undefined;
         var metric = options.metric || 1;
         var assets = options.assets || original_assets;

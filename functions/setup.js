@@ -27,7 +27,8 @@ var startYear = 1990,
         vehicle: '#636363',
         bus: '#9e9ac8',
         light_rail: '#969696'
-    };
+    },
+    ldur = 750, mdur = 500, sdur = 100;
 
 /******************
     CONFIG FUNCTION
@@ -40,7 +41,7 @@ function config(values) {
         try {
             eval(i+' = '+values[i]+' || '+i);
         } catch (e) {
-            console.log(e);
+            eval(i+' = undefined');
         }
     }
 
@@ -51,7 +52,7 @@ function config(values) {
     
     d3.select('body').style("opacity", 0);
     d3.select('body').transition()
-        .duration(750)
+        .duration(ldur)
         .style("opacity", 1);
     
     // track detail tooltips
@@ -83,26 +84,33 @@ $('#config-form input').each(function() {
 // show dialog
 $('#config-form').dialog({
     autoOpen: true,
-    height: 500,
-    width: 500,
     modal: true,
     resizable: false,
+    draggable: false,
     buttons: {
         Okay: function() {
-            var values = {};
-            
-            // read values and configure
-            $('.config-field').each(function() {
-                values[$(this).attr('id')] = $(this).val();
-            });
-            config(values);
-            
-            $('#notes').animate({opacity: 1}, 750);
             $(this).dialog('close');
         }
     },
+    beforeClose: function() {
+        var values = {};
+        
+        // read values and configure
+        $('.config-field').each(function() {
+            values[$(this).attr('id')] = $(this).val();
+        });
+        config(values);
+        
+        $('#notes').animate({opacity: 1}, ldur);
+    },
     hide: {
         effect: 'fade',
-        duration: 100
+        duration: sdur
     }
+});
+
+// close dialog on enter
+$('#config-form input').on('keyup', function(e) {
+    if (e.which === 13)
+        $('#config-form').dialog('close');
 });

@@ -45,6 +45,10 @@ body {
 .ui-tooltip-content {
     font-family: Century Gothic, Arial, Helvetica;
 }
+
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
     
 #sunburst {
     width: 40%;

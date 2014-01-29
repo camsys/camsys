@@ -143,7 +143,7 @@ function sunburst(data) {
         INITIAL TRANSITIONS
     ************************/
     
-    svg.transition().duration(750)
+    svg.transition().duration(ldur)
         .attr('transform', svg.attr('transform').replace('scale(0)', 'scale(1)'));
     
     /************************
@@ -162,7 +162,7 @@ function sunburst(data) {
             partitioned = partition.nodes(root);
             path.data(partitioned)
                 .each(function(d) { zoomed_node = d.name === zoomed_name ? d : zoomed_node; })
-                .transition().duration(500).ease('cubic-out')
+                .transition().duration(mdur).ease('cubic-out')
                 .attrTween('d', attrTween(zoomed_node));
             update_title();
         }
@@ -180,7 +180,7 @@ function sunburst(data) {
         zoomed_node = d;
         area_bar_updater(d.name);
         path.transition()
-            .duration(500).ease('cubic-out')
+            .duration(mdur).ease('cubic-out')
             .attrTween("d", attrTween(d));
         update_title();
     }

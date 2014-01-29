@@ -265,7 +265,7 @@ function area_bar(data) {
     
     var trajectory = function(year) {
         var ab = Util.linear_regression(regression_points);
-        return ab[0]*year+ab[1];
+        return Math.max(0, Math.min(100, ab[0]*year+ab[1]));
     };
     
     var flat_line = d3.svg.line()
@@ -329,15 +329,15 @@ function area_bar(data) {
     ************************/
     
     investment_path.selectAll("path")
-        .transition().duration(m * 20)
+        .transition().duration(ldur)
         .attr("d", investment_line);
     
     trajectory_path.selectAll("path")
-        .transition().duration(m * 20)
+        .transition().duration(ldur)
         .attr("d", trajectory_line);
     
     rect.transition()
-        .delay(function(d, i) { return i * 10; })
+        .delay(function(d, i, j) { return (i+j) * ldur/(m+n); })
         .attr("y", function(d) { return yScale(d.y0 + d.y); })
         .attr("height", function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); });
     
@@ -348,7 +348,7 @@ function area_bar(data) {
     function update_year(d) {
         sunburst_updater(d.x);
         svg.select('.indicator')
-            .transition().duration(500).ease('cubic-out')
+            .transition().duration(mdur).ease('cubic-out')
             .attr('transform', 'translate('+(xScale(d.x)+xScale.rangeBand()/2)+','+height+')');
     }
     
@@ -402,12 +402,13 @@ function area_bar(data) {
         
         ryScale.domain([0, ryMax]);
         ryAxis.scale(ryScale);
-        ry_axis.call(ryAxis);
         
         // transition
+        ry_axis.transition().duration(ldur).ease('cubic-out')
+            .call(ryAxis);
         layer.data(layers);
         rect.data(function(d) { return d; })
-            .transition().duration(750).ease('cubic-out')
+            .transition().duration(ldur).ease('cubic-out')
             .attr("x", function(d) { return xScale(d.x); })
             .attr("y", function(d) { return yScale(d.y0 + d.y); })
             .attr("height", function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); });
@@ -415,7 +416,7 @@ function area_bar(data) {
             .y(function(d) { return ryScale(d.ry); });
         investment_path
             .selectAll("path").datum(layers[0])
-            .transition().duration(750).ease('cubic-out')
+            .transition().duration(ldur).ease('cubic-out')
             .attr("d", investment_line);
     }
 }
