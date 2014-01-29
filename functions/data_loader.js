@@ -1,9 +1,20 @@
 var load_data = function (csv) {
-    var assets = [];
     
-    for (var i in csv) {
-        assets.push(new Asset($.extend(true, {}, csv[i])));
-    }
+    // perform any necessary data transformations here
     
-    return new System(assets);
+    /*******************************
+        SCHEMA:
+        [
+            {
+                serial: STRING (unique ID)
+                type: STRING (type of asset)
+                years: INTEGERS ARRAY (years of purchase/replacement)
+                prices: INTEGER ARRAY (same length as years, prices of purchases)
+                usage: INTEGER (related to ridership)
+            },
+            {...},...
+        ]
+    *******************************/
+    
+    return new System(csv);
 };

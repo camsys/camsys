@@ -1,4 +1,9 @@
-var System = function (original_assets) {
+var System = function (csv) {
+    var original_assets = [];
+    
+    for (var i in csv) {
+        original_assets.push(new Asset($.extend(true, {}, csv[i])));
+    }
         
     // runs a given function over multiple years
     function per_year(func, years, options) {
@@ -212,8 +217,28 @@ var System = function (original_assets) {
     *****************************/
     
     this.budget_to_clear_by = function (year) {
+        // set low guess at 0
+        // set high guess at cost of first year at unconstrained
+        // check both ends
+        // check middle
+        // if too low, set low guess at middle
+        // if too high, set high guess at middle
+        // recursive binary search
     };
     
-    this.years_to_clear_with = function (budget) {
+    this.year_to_clear_with = function (budget) {
+        // run GMBB with budget
+        // find first year with backlog = 0
+        var fresh_assets = [];
+        for (var i in csv) {
+            fresh_assets.push(new Asset($.extend(true, {}, csv[i])));
+        }
+        var year = currentYear;
+        while (GMBB(year, {budget: budget,
+                           assets: fresh_assets,
+                           metric: area_bar_metric}).backlog > 0 && year < 3000)
+            year++;
+        console.log(fresh_assets[20].age(currentYear));
+        return year === 3000 ? Infinity : year;
     };
 }
