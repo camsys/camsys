@@ -70,7 +70,7 @@ function sunburst(data) {
     var svg = container.append("svg")
         .attr('viewBox', '0 0 '+width+' '+height)
       .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ") scale(0)")
         .attr("title",'...');
     
     var path = svg.selectAll("path")
@@ -134,10 +134,8 @@ function sunburst(data) {
         INITIAL TRANSITIONS
     ************************/
     
-    d3.select('body').style("opacity", 0);
-    d3.select('body').transition()
-        .duration(750)
-        .style("opacity", 1);
+    svg.transition().duration(750)
+        .attr('transform', svg.attr('transform').replace('scale(0)', 'scale(1)'));
     
     /************************
         UPDATE FUNCTIONS
@@ -160,7 +158,7 @@ function sunburst(data) {
     function click(d) {
         area_bar_updater(d.name);
         path.transition()
-            .duration(750)
+            .duration(750).ease('cubic-out')
             .attrTween("d", zoomTween(d));
     }
     

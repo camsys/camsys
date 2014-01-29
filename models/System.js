@@ -105,8 +105,10 @@ var System = function (assets) {
         var backlog_queue = [];
         var marginal_queue = [];
         function compare(a,b) {
-            return a[1] < b[1] ? 1 :
-                a[1] > b[1] ? -1 : 0;
+            a.measure = a.asset.decay_rate(year);
+            b.measure = b.asset.decay_rate(year);
+            return a.measure < b.measure ? 1 :
+                a.measure > b.measure ? -1 : 0;
         }
         
         
@@ -129,17 +131,22 @@ var System = function (assets) {
             var condition;
             
             // determine state of repair by proximity to replacement year
+            var queue_item = {
+                asset: asset,
+                measure: measure,
+                cost: raw_cost
+            };
             if (replacement_year === year) {
                 condition= 'bad';
-                bad_queue.push([asset, measure, raw_cost]);
+                bad_queue.push(queue_item);
             }
             else if (replacement_year < year) {
                 condition= 'backlog';
-                backlog_queue.push([asset, measure, raw_cost]);
+                backlog_queue.push(queue_item);
             }
             else if (replacement_year === year + 1) {
                 condition= 'marginal';
-                marginal_queue.push([asset, measure, raw_cost]);
+                marginal_queue.push(queue_item);
             }
             else
                 condition= 'good';
@@ -172,17 +179,17 @@ var System = function (assets) {
         
         while (budget > 0 && queue.length > 0) {
             var i = queue.length-1;
-            while (i >= 0 && queue[i][2] > budget)
+            while (i >= 0 && queue[i].cost > budget)
                 i--; // skip over investments greater than available budget
             if (i < 0) break; // all possible investments made\
             
             // replace asset
             var replaced = queue.splice(i,1)[0];
-            var asset = replaced[0];
+            var asset = replaced.asset;
             var serial = asset.serial();
             var type = asset.type();
             var clas = asset.class();
-            var cost = replaced[2];
+            var cost = replaced.cost;
             asset.replace(year);
             budget -= cost;
             gmbb.investment += cost;

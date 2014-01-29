@@ -1,8 +1,9 @@
 var load_data = function (csv) {
+    var assets = [];
     
     for (var i in csv) {
-        csv[i] = new Asset(csv[i]);
+        assets.push(new Asset($.extend(true, {}, csv[i])));
     }
     
-    return new System(csv);
+    return new System(assets);
 };

@@ -60,8 +60,11 @@ var Asset = function(values) {
         GOOD REPAIR FUNCTIONS
     *******************************/
     
+    this.condition = function (year) {
+        return TERM(type)(this.age(year));
+    };
     this.in_good_repair = function (year) {
-        return TERM(type)(this.age(year)) >= 2.5;
+        return this.condition(year) >= 2.5;
     };
     this.replacement_cost = function (year) {
         return this.in_good_repair(year) ? 0 : this.price(year);
@@ -89,5 +92,8 @@ var Asset = function(values) {
     };
     this.replacement_year = function (year) {
         return year + this.projected_lifespan() - this.age(year);
+    };
+    this.decay_rate = function (year) {
+        return this.condition(year) - this.condition(year+1);
     };
 }

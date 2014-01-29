@@ -37,6 +37,7 @@ function area_bar(data) {
         }
     }
     
+    // merge historical and projected data
     var merged_data = $.extend({}, historical_data, projected_data);
     for (var year in merged_data) {
         for (var condition in index_mapping) {
@@ -46,55 +47,6 @@ function area_bar(data) {
                 ry: merged_data[year].investment
             });
         }
-    }
-    
-    function search(node, name) {
-        if (node.children === undefined)
-            return undefined;
-        var result = node.children[name];
-        if (result === undefined) {
-            for (var i in node.children) {
-                var result = search(node.children[i], name) || result;
-            }
-        }
-        return result;
-    }
-    
-    area_bar_updater = function (name) {
-        for (var year in projected_data) {
-            var root = projected_data[year];
-            var result = search(root, name) || root;
-            merged_data[year] = result;
-        }
-        for (var i in layer_data)
-            layer_data[i] = [];
-        for (var year in merged_data) {
-            for (var condition in index_mapping) {
-                layer_data[index_mapping[condition]].push({
-                    x: parseInt(year),
-                    y: merged_data[year][condition]*100,
-                    ry: merged_data[year].investment
-                });
-            }
-        }
-        layers = stack(d3.range(n).map(function(i) { return layer_data[i]; }));
-        ryMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.ry; }); });
-        ryMax = constrained ? yearly_budget : ryMax;
-        ryScale.domain([0, ryMax]);
-        ryAxis.scale(ryScale);
-        layer.data(layers);
-        ry_axis.call(ryAxis);
-        rect.data(function(d) { return d; })
-            .transition()
-            .attr("x", function(d) { return xScale(d.x); })
-            .attr("y", function(d) { return yScale(d.y0 + d.y); })
-            .attr("height", function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); });
-        investment_line
-            .y(function(d) { return ryScale(d.ry); });
-        investment_path
-            .selectAll("path").datum(layers[0])
-        .transition()
-            .attr("d", investment_line);
     }
     
     /************************
@@ -408,5 +360,62 @@ function area_bar(data) {
         }
         tooltip_html += format_dollars(d.ry);
         $('.ui-tooltip-content').html(tooltip_html);
+    }
+    
+    function search(node, name) {
+        if (node.children === undefined)
+            return undefined;
+        var result = node.children[name];
+        if (result === undefined) {
+            for (var i in node.children) {
+                var result = search(node.children[i], name) || result;
+            }
+        }
+        return result;
+    }
+    
+    area_bar_updater = function (name) {
+        // set data
+        for (var year in projected_data) {
+            var root = projected_data[year];
+            var result = search(root, name) || root;
+            merged_data[year] = result;
+        }
+        
+        // re-populate data
+        for (var i in layer_data)
+            layer_data[i] = [];
+        for (var year in merged_data) {
+            for (var condition in index_mapping) {
+                layer_data[index_mapping[condition]].push({
+                    x: parseInt(year),
+                    y: merged_data[year][condition]*100,
+                    ry: merged_data[year].investment
+                });
+            }
+        }
+        
+        // set D3
+        layers = stack(d3.range(n).map(function(i) { return layer_data[i]; }));
+        ryMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.ry; }); });
+        ryMax = constrained ? yearly_budget : ryMax;
+        
+        ryScale.domain([0, ryMax]);
+        ryAxis.scale(ryScale);
+        ry_axis.call(ryAxis);
+        
+        // transition
+        layer.data(layers);
+        rect.data(function(d) { return d; })
+            .transition().duration(750).ease('cubic-out')
+            .attr("x", function(d) { return xScale(d.x); })
+            .attr("y", function(d) { return yScale(d.y0 + d.y); })
+            .attr("height", function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); });
+        investment_line
+            .y(function(d) { return ryScale(d.ry); });
+        investment_path
+            .selectAll("path").datum(layers[0])
+            .transition().duration(750).ease('cubic-out')
+            .attr("d", investment_line);
     }
 }

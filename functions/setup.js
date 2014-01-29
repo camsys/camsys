@@ -49,6 +49,11 @@ function config(values) {
     area_bar(data);
     sunburst(data);
     
+    d3.select('body').style("opacity", 0);
+    d3.select('body').transition()
+        .duration(750)
+        .style("opacity", 1);
+    
     // track detail tooltips
     $('#visuals').tooltip({
         track: true,
