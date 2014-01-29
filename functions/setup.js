@@ -49,32 +49,11 @@ function config(values) {
     var data = load_data(sample_data);
     area_bar(data);
     sunburst(data);
-    
-    d3.select('body').style("opacity", 0);
-    d3.select('body').transition()
-        .duration(ldur)
-        .style("opacity", 1);
-    
-    // track detail tooltips
-    $('#visuals').tooltip({
-        track: true,
-        show: false,
-        hide: false
-    });
-    
-    // preserve aspect ratio on resize
-    $(window).on('resize', function() {
-        $('#area_bar').css('height', $('#area_bar').width()/5*3);
-        $('#sunburst').css('height', $('#area_bar').height());
-    });
 }
 
 /******************
     MODAL SETUP
 ******************/
-
-// initial hide
-$('#notes').css('opacity', 0);
 
 // display default values in input boxes
 $('#config-form input').each(function() {
@@ -100,8 +79,16 @@ $('#config-form').dialog({
             values[$(this).attr('id')] = $(this).val();
         });
         config(values);
+    
+        // fade in visuals
+        d3.select('#visuals')
+            .style('opacity', 0)
+            .transition()
+            .duration(ldur)
+            .style("opacity", 1);
         
-        $('#notes').animate({opacity: 1}, ldur);
+        d3.selectAll('#notes, #title').transition()
+            .duration(ldur).style('opacity', 1);
     },
     hide: {
         effect: 'fade',
@@ -109,8 +96,32 @@ $('#config-form').dialog({
     }
 });
 
+$('#config-toggle').on('click', function () {
+    $('#config-form').dialog('open');
+});
+
+/******************
+    DOC SETUP
+******************/
+
+// initial hide
+d3.selectAll('#notes, #title').style('opacity', 0);
+    
+// track detail tooltips
+$('#visuals').tooltip({
+    track: true,
+    show: false,
+    hide: false
+});
+
 // close dialog on enter
 $('#config-form input').on('keyup', function(e) {
     if (e.which === 13)
         $('#config-form').dialog('close');
+});
+    
+// preserve aspect ratio on resize
+$(window).on('resize', function() {
+    $('#area_bar').css('height', $('#area_bar').width()/5*3);
+    $('#sunburst').css('height', $('#area_bar').height());
 });

@@ -4,6 +4,7 @@ var area_bar_updater;
 function area_bar(data) {
     
     var jqcontainer = $('#area_bar');
+    jqcontainer.html('');
     var container = d3.select('#area_bar');
     jqcontainer.css('height', jqcontainer.width()/5*3);
     

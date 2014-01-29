@@ -5,6 +5,7 @@ function sunburst(data) {
     
     var container = d3.select('#sunburst');
     var jqcontainer = $('#sunburst');
+    jqcontainer.html('');
     var title = $('#title');
     jqcontainer.css('height', $('#area_bar').height());
     
