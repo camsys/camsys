@@ -1,4 +1,4 @@
-var TERM_module = function () {
+var TERM = (function () {
     function scaled_sigmoid(number) {
         return Math.exp(number) / (1 + Math.exp(number)) * 4 + 1;
     }
@@ -58,6 +58,4 @@ var TERM_module = function () {
             t = t.replace(' ', '_');
         return functions[t];
     }
-}
-
-var TERM = TERM_module();
+})();

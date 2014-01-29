@@ -1,7 +1,6 @@
 <html>
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-        <script src="../functions/data_generator.js"></script>
         <script src="random_data.js"></script>
     </head>
     <body>
@@ -14,6 +13,7 @@
                     <td>marginal</td>
                     <td>bad</td>
                     <td>backlog</td>
+                    <td>usage</td>
                 </tr>
             </table>
         </div>
@@ -41,14 +41,14 @@
         var width = function() { return assets_table.width(); };
         
         var measure = function(i) {
-            return cumulative_data[i].price * Math.log(asset_usage[i]);
+            return cumulative_data[i].price * Math.log(cumulative_data[i].usage);
         }
         
         for (var i in cumulative_data) {
             var new_row = $('<tr><td>'+i+'</td></tr>');
             for (var j in cumulative_data[i]) {
                 new_row.append('<td><input class="gmbb" data-type="'+i+'" data-condition="'+j+'" value="'+cumulative_data[i][j]+'"></td>');
-                if (j !== 'price') {
+                if (['price', 'usage'].indexOf(j) < 0) {
                     gmbb[j] += measure(i) * cumulative_data[i][j];
                 }
             }
@@ -82,7 +82,7 @@
                     };
                     for (var i in cumulative_data) {
                         for (var j in cumulative_data[i]) {
-                            if (j !== 'price') {
+                            if (['price', 'usage'].indexOf(j) < 0) {
                                 gmbb[j] += measure(i) * cumulative_data[i][j];
                             }
                         }

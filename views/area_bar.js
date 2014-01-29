@@ -16,7 +16,7 @@ function area_bar(data) {
     var constrained = yearly_budget < Infinity;
     
     // generate historical data
-    var historical_data = generate_history(startYear, currentYear-1, constrained);
+    var historical_data = Generator.generate_history(startYear, currentYear-1, constrained);
     
     // get projected data for future years
     var years = [];
@@ -264,7 +264,7 @@ function area_bar(data) {
     }
     
     var trajectory = function(year) {
-        var ab = linear_regression(regression_points);
+        var ab = Util.linear_regression(regression_points);
         return ab[0]*year+ab[1];
     };
     
@@ -358,7 +358,7 @@ function area_bar(data) {
             var percent = Math.round(layers[index_mapping[j]][i].y*100)/100;
             tooltip_html += '<i>'+j+'</i>' + ': ' + percent + '%<br>';
         }
-        tooltip_html += format_dollars(d.ry);
+        tooltip_html += Util.format_dollars(d.ry);
         $('.ui-tooltip-content').html(tooltip_html);
     }
     

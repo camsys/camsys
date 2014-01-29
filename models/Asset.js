@@ -1,17 +1,18 @@
-var asset_class = {
-    bus: 'vehicle',
-    light_rail: 'vehicle',
-    street: 'infrastructure',
-    track: 'infrastructure',
-    building_utilities: 'infrastructure',
-    maintenance_building: 'infrastructure',
-    overhead: 'infrastructure',
-    parking: 'infrastructure',
-    systems: 'infrastructure',
-    utility_building: 'infrastructure'
-};
-
 var Asset = function(values) {
+    
+    var asset_class = {
+        bus: 'vehicle',
+        light_rail: 'vehicle',
+        street: 'infrastructure',
+        track: 'infrastructure',
+        building_utilities: 'infrastructure',
+        maintenance_building: 'infrastructure',
+        overhead: 'infrastructure',
+        parking: 'infrastructure',
+        systems: 'infrastructure',
+        utility_building: 'infrastructure'
+    };
+
     /*******************************
         INTERNAL DATA
     *******************************/

@@ -111,7 +111,6 @@ function sunburst(data) {
             })
             .on('click', function() {
                 d3.event.stopPropagation();
-                console.log(node.name);
                 svg.select('.'+node.name).each(function(d) {
                     if (d.dx > 0)
                         zoom(d);
@@ -173,7 +172,7 @@ function sunburst(data) {
     
     function update_title() {
         title.html('<h2>'+displayedYear+'</h2>'
-               +'<p>'+zoomed_name+': '+format_dollars(zoomed_node.value)+'</p>');
+               +'<p>'+zoomed_name+': '+Util.format_dollars(zoomed_node.value)+'</p>');
     }
     
     update_title();
@@ -191,7 +190,7 @@ function sunburst(data) {
     function update_tooltip(d) {
         d3.select(".ui-tooltip-content")
             .html('<b>'+(d.children ? d.name.replace('_',' ') : d.name)
-                  +'</b><br>'+format_dollars(d.value));
+                  +'</b><br>'+Util.format_dollars(d.value));
     }
     
     function toggle_legend() {
