@@ -13,7 +13,7 @@ Area Bar Chart Visualization
 * Black pointer: indicates the year currently being displayed in the Sunburst visualization.
 
 Left Y-Axis (weighted % of assets)
---------------------------------
+----------------------------------
 * Colored bars: represent percentage of assets in each type of condition.
 * Green trendline: a linear regression on the historical percentages of "good" assets.
 * Water table threshold line: the "goal", a user-defined threshold for being in "good repair".
@@ -35,6 +35,14 @@ Each layer outward displays the data in a finer grain. Unzoomed, this correspond
 Clicking on any segment in a layer will zoom into the segment, with itself expanding to occupy the entire 360 degrees and its sub-divisions in the next layer expanding accordingly. Clicking on the small circle in the center will zoom back out into the previous layer.  
 Zooming in on a segment will also re-scale the Area Bar Chart to display percentages and investment for the selected sub-group only.  
 Clicking on the list icon in the upper right reveals a heirarchical legend. Clicking on these items corresponds to clicking on segments in the Sunburst chart.
+
+Default Metrics (in functions/setup.js)
+=======================================
+* Area Bar Chart
+  * area_bar_metric: weights each asset LINEARLY with its PRICE and LOGARITHMICALLY with its USAGE, so expensive and highly-used (by commuters) assets are weighted the highest. Usage is currently made-up data loosely related to number of commuters served per day.
+  * area_bar_comparator: sorts the yearly replacement priority queue by each asset's RATE OF DECAY, or the slope of its TERM curve at the given year; faster-decaying assets are queued higher up.
+* Sunburst
+  * sunburst_metric: arc angle is proportional to the actual amount invested in each asset at any given year (previously was the amount of investmend needed to bring each asset back into good repair).
 
 Current To-dos
 ==============
