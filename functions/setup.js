@@ -40,7 +40,7 @@ var startYear = 1990,
 /******************
     CONFIG FUNCTION
 ******************/
-
+var data;
 function config(values) {
     
     // evaluate each config option
@@ -53,7 +53,7 @@ function config(values) {
     }
 
     // load and display data
-    var data = load_data(sample_data);
+    data = load_data(sample_data);
     area_bar(data);
     sunburst(data);
 }

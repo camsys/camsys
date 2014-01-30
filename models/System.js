@@ -124,7 +124,7 @@ var System = function (csv) {
      */
     function GMBB(year, options) {
         var budget = options.budget || Infinity;
-        var constrained = budget !== undefined;
+        var constrained = budget < Infinity;
         var metric = options.metric || 1;
         var comparator = options.comparator || function () { return 0; };
         var assets = options.assets || original_assets;
@@ -240,14 +240,43 @@ var System = function (csv) {
         OPTIMIZATION FUNCTIONS
     *****************************/
     
+    /**
+     *  Calculates the flat annual budget required
+     *  to clear the backlog by the given year.
+     *  @param year a number
+     *  @return a number
+     */
     this.budget_to_clear_by = function (year) {
-        // set low guess at 0
-        // set high guess at cost of first year at unconstrained
-        // check both ends
-        // check middle
-        // if too low, set low guess at middle
-        // if too high, set high guess at middle
-        // recursive binary search
+        var fresh_assets = [];
+        for (var i in csv) {
+            fresh_assets.push(new Asset($.extend(true, {}, csv[i])));
+        }
+        
+        // starting bounds: no budget and budget needed to clear this year
+        var highGuess = GMBB(currentYear, {assets: fresh_assets,
+                                           metric: area_bar_metric,
+                                           comparator: area_bar_comparator}).investment;
+        var lowGuess = 0;
+        var middleGuess = (lowGuess+highGuess)/2;
+        var middleYear = this.year_to_clear_with(middleGuess);
+        var e = 1000;
+        
+        if (year === currentYear)
+            return highGuess;
+        
+        // binary search between the bounds for the lowest
+        // budget that can clear the backlog in time
+        while (e > 1 || middleYear !== year) {
+            middleGuess = (lowGuess+highGuess)/2;
+            middleYear = this.year_to_clear_with(middleGuess);
+            if (middleYear > year)
+                lowGuess = middleGuess;
+            else
+                highGuess = middleGuess;
+            e = highGuess - lowGuess;
+        }
+        
+        return Math.floor(middleGuess);
     };
     
     /**
@@ -267,8 +296,9 @@ var System = function (csv) {
         var year = currentYear;
         while (GMBB(year, {budget: budget,
                            assets: fresh_assets,
-                           metric: area_bar_metric}).backlog > 0 && year < 3000)
+                           metric: area_bar_metric,
+                           comparator: area_bar_comparator}).backlog > 0 && year < currentYear+100)
             year++;
-        return year === 3000 ? Infinity : year;
+        return year === currentYear+100 ? Infinity : year;
     };
 }
