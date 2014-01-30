@@ -1,3 +1,6 @@
+/**
+ *  Exposes useful utility functions.
+ */
 var Util = new (function() {
     this.format_dollars = function (number) {
         var amount = ''+number;

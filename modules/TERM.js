@@ -1,3 +1,7 @@
+/**
+ *  Exposes functions to calculate the TERM
+ *  condition rating of each type of asset.
+ */
 var TERM = (function () {
     function scaled_sigmoid(number) {
         return Math.exp(number) / (1 + Math.exp(number)) * 4 + 1;

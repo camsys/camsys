@@ -1,6 +1,12 @@
+/**
+ *  Stores data for an array of assets as a system.
+ *  Exposes functions for system-wide state of good repair
+ *  and data re-formatting.
+ */
 var System = function (csv) {
-    var original_assets = [];
     
+    // transform raw CSV data into Asset objects
+    var original_assets = [];
     for (var i in csv) {
         original_assets.push(new Asset($.extend(true, {}, csv[i])));
     }
@@ -25,8 +31,14 @@ var System = function (csv) {
     
     this.format = {
         
-        // format data into the 'flare.json' format
-        // found on many D3 examples
+        /**
+         *  Formats the data into the 'flare.json' format commonly
+         *  used in D3 examples. In particular, to make it play nice
+         *  with d3.partition.nodes() for the sunburst graph.
+         *  @param metric the size function for each asset,
+         *      as a function of a single Asset object
+         *  @return a 'flare.json' data object representing this System
+         */
         flare: function (metric) {
             
             // define root
@@ -91,12 +103,30 @@ var System = function (csv) {
         SYSTEM METRICS
     *****************************/
     
-    // calculates the good/marginal/bad/backlog
-    // percentages per year
+    /**
+     *  Calculates the percentages of good, marginal, bad
+     *  and backlog assets during the given year, as well
+     *  as the investment during that year.
+     *  Also stores the percentage data for each sub-class
+     *  and sub-type of asset in the 'children' field.
+     *  OPTIONS: {
+     *      budget: A NUMBER representing annual budget,
+     *      metric: A FUNCTION (Asset object, year number)
+     *          determines the weight of each asset,
+     *      comparator: A FUNCTION (Asset object, Asset object, year)
+     *          determines the priority queue order of the assets
+     *          (last index popped first),
+     *      assets: AN ARRAY of assets to calculate with
+     *  }
+     *  @param year a number
+     *  @param options an optional object as described above
+     *  @return an object with percentage and investment data
+     */
     function GMBB(year, options) {
         var budget = options.budget || Infinity;
         var constrained = budget !== undefined;
         var metric = options.metric || 1;
+        var comparator = options.comparator || function () { return 0; };
         var assets = options.assets || original_assets;
         
         var template = {
@@ -111,11 +141,8 @@ var System = function (csv) {
         var bad_queue = [];
         var backlog_queue = [];
         var marginal_queue = [];
-        function compare(a,b) {
-            a.measure = a.asset.decay_rate(year);
-            b.measure = b.asset.decay_rate(year);
-            return a.measure < b.measure ? 1 :
-                a.measure > b.measure ? -1 : 0;
+        function compare(a, b) {
+            return comparator(a, b, year);
         }
         
         
@@ -132,38 +159,36 @@ var System = function (csv) {
                 gmbb.children[clas].children[type] = $.extend({}, template, {children:{}});
             gmbb.children[clas].children[type].children[serial] = $.extend({}, template);
             
+            // determine state of repair by proximity to replacement year
+            
             var replacement_year = asset.replacement_year(year);
-            var measure = metric(asset, year);
-            var raw_cost = asset.price(year);
             var condition;
             
-            // determine state of repair by proximity to replacement year
-            var queue_item = {
-                asset: asset,
-                measure: measure,
-                cost: raw_cost
-            };
             if (replacement_year === year) {
                 condition= 'bad';
-                bad_queue.push(queue_item);
+                bad_queue.push(asset);
             }
             else if (replacement_year < year) {
                 condition= 'backlog';
-                backlog_queue.push(queue_item);
+                backlog_queue.push(asset);
             }
             else if (replacement_year === year + 1) {
                 condition= 'marginal';
-                marginal_queue.push(queue_item);
+                marginal_queue.push(asset);
             }
             else
                 condition= 'good';
+            
+            var measure = metric(asset, year);
+            
             gmbb[condition] += measure;
             gmbb.children[clas][condition] += measure;
             gmbb.children[clas].children[type][condition] += measure;
             gmbb.children[clas].children[type].children[serial][condition] += measure;
         }
         
-        // normalize
+        // normalize to [0,1]
+        
         function normalize(node) {
             var total = node.good + node.bad + node.marginal + node.backlog;
             node.good /= total; node.bad /= total; node.marginal /= total; node.backlog /= total;
@@ -174,27 +199,26 @@ var System = function (csv) {
         
         // clear as much investment as possible
         // using bad-marginal-backlog queue order
+        
         bad_queue.sort(compare);
         backlog_queue.sort(compare);
         marginal_queue.sort(compare);
-        
         var queue = constrained
             ? backlog_queue.concat(marginal_queue.concat(bad_queue))
             : backlog_queue;
         
         while (budget > 0 && queue.length > 0) {
             var i = queue.length-1;
-            while (i >= 0 && queue[i].cost > budget)
+            while (i >= 0 && queue[i].price(year) > budget)
                 i--; // skip over investments greater than available budget
             if (i < 0) break; // all possible investments made\
             
             // replace asset
-            var replaced = queue.splice(i,1)[0];
-            var asset = replaced.asset;
+            var asset = queue.splice(i,1)[0];
             var serial = asset.serial();
             var type = asset.type();
             var clas = asset.class();
-            var cost = replaced.cost;
+            var cost = asset.price(year);
             asset.replace(year);
             budget -= cost;
             gmbb.investment += cost;
@@ -226,8 +250,15 @@ var System = function (csv) {
         // recursive binary search
     };
     
+    /**
+     *  Calculates the year the backlog will be cleared by
+     *  given the specified annual budget.
+     *  @param budget a number
+     *  @return a number
+     */
     this.year_to_clear_with = function (budget) {
-        // run GMBB with budget
+        // run GMBB with budget through each year
+        // starting from the current year
         // find first year with backlog = 0
         var fresh_assets = [];
         for (var i in csv) {
@@ -238,7 +269,6 @@ var System = function (csv) {
                            assets: fresh_assets,
                            metric: area_bar_metric}).backlog > 0 && year < 3000)
             year++;
-        console.log(fresh_assets[20].age(currentYear));
         return year === 3000 ? Infinity : year;
     };
 }

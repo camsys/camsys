@@ -17,14 +17,15 @@ function area_bar(data) {
     var constrained = yearly_budget < Infinity;
     
     // generate historical data
-    var historical_data = Generator.generate_history(startYear, currentYear-1, constrained);
+    var historical_data = Generator.generate_history(startYear, currentYear-1, yearly_budget);
     
     // get projected data for future years
     var years = [];
     for (var year = currentYear; year <= endYear; year++)
         years.push(year);
     var projected_data = data.system_metric.gmbb(years, {budget: yearly_budget,
-                                                         metric: area_bar_metric});
+                                                         metric: area_bar_metric,
+                                                         comparator: area_bar_comparator});
     
     // set up layered data array
     var layer_data = [];

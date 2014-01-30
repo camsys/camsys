@@ -8,9 +8,15 @@ var startYear = 1990,
     threshold = 80,
     yearly_budget = 10000000,
     area_bar_metric = function (asset, year) {
+        // ADJUSTED PRICE * LOG(USAGE METRIC)
         return asset.price(year) * Math.log(asset.usage());
     },
+    area_bar_comparator = function (a, b, year) {
+        // FASTER DECAY HIGHER PRIORITY
+        return b.decay_rate(year) - a.decay_rate(year);
+    },
     sunburst_metric = function (asset, year) {
+        // actual amount invested/projected to invest
         return asset.amount_invested(year);
     },
     color_scheme = {
@@ -28,6 +34,7 @@ var startYear = 1990,
         bus: '#9e9ac8',
         light_rail: '#969696'
     },
+    // transition durations
     ldur = 750, mdur = 500, sdur = 100;
 
 /******************

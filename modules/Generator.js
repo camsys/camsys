@@ -1,3 +1,7 @@
+/**
+ *  Exposes functions to generate asset data
+ *  and historical percentage/investment data.
+ */
 var Generator = new (function() {
     var asset_distribution = {
         bus: 70,
@@ -96,7 +100,7 @@ var Generator = new (function() {
         return csv;
     };
     
-    this.generate_history = function (start, end, constrained) {
+    this.generate_history = function (start, end, budget) {
         var yearly_data = {};
         for (var year=start; year<=end; year++) {
             var good = 0.5+Math.random()*0.3;
@@ -108,7 +112,7 @@ var Generator = new (function() {
                 marginal: marginal,
                 bad: bad,
                 backlog: backlog,
-                investment: constrained ? yearly_budget*(1.5-good) : 10000000*(1.2-good)
+                investment: budget ? budget*(1.5-good) : 10000000*(1.2-good)
             };
         }
         return yearly_data;

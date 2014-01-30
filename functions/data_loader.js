@@ -14,6 +14,8 @@ var load_data = function (csv) {
             },
             {...},...
         ]
+        
+        see data/sample_data.js
     *******************************/
     
     return new System(csv);
