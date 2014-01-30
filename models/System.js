@@ -8,7 +8,7 @@ var System = function (csv) {
     // transform raw CSV data into Asset objects
     var original_assets = [];
     for (var i in csv) {
-        original_assets.push(new Asset($.extend(true, {}, csv[i])));
+        original_assets.push(new Asset(Util.clone(csv[i])));
     }
         
     // runs a given function over multiple years
@@ -136,7 +136,8 @@ var System = function (csv) {
             backlog: 0,
             investment: 0
         };
-        var gmbb = $.extend({}, template, {children:{}});
+        
+        var gmbb = Util.clone(template, {children:{}});
         
         var bad_queue = [];
         var backlog_queue = [];
@@ -154,10 +155,10 @@ var System = function (csv) {
             var clas = asset.class();
             
             if (gmbb.children[clas] === undefined)
-                gmbb.children[clas] = $.extend({}, template, {children:{}});
+                gmbb.children[clas] = Util.clone(template, {children:{}});
             if (gmbb.children[clas].children[type] === undefined)
-                gmbb.children[clas].children[type] = $.extend({}, template, {children:{}});
-            gmbb.children[clas].children[type].children[serial] = $.extend({}, template);
+                gmbb.children[clas].children[type] = Util.clone(template, {children:{}});
+            gmbb.children[clas].children[type].children[serial] = Util.clone(template);
             
             // determine state of repair by proximity to replacement year
             
@@ -249,7 +250,7 @@ var System = function (csv) {
     this.budget_to_clear_by = function (year) {
         var fresh_assets = [];
         for (var i in csv) {
-            fresh_assets.push(new Asset($.extend(true, {}, csv[i])));
+            fresh_assets.push(new Asset(Util.clone(csv[i])));
         }
         
         // starting bounds: no budget and budget needed to clear this year
@@ -257,8 +258,7 @@ var System = function (csv) {
                                            metric: area_bar_metric,
                                            comparator: area_bar_comparator}).investment;
         var lowGuess = 0;
-        var middleGuess = (lowGuess+highGuess)/2;
-        var middleYear = this.year_to_clear_with(middleGuess);
+        var middleGuess, middleYear;
         var e = 1000;
         
         if (year === currentYear)
@@ -266,7 +266,7 @@ var System = function (csv) {
         
         // binary search between the bounds for the lowest
         // budget that can clear the backlog in time
-        while (e > 1 || middleYear !== year) {
+        while (e > 1 || middleYear > year) {
             middleGuess = (lowGuess+highGuess)/2;
             middleYear = this.year_to_clear_with(middleGuess);
             if (middleYear > year)
@@ -276,7 +276,7 @@ var System = function (csv) {
             e = highGuess - lowGuess;
         }
         
-        return Math.floor(middleGuess);
+        return Math.ceil(middleGuess);
     };
     
     /**
@@ -291,7 +291,7 @@ var System = function (csv) {
         // find first year with backlog = 0
         var fresh_assets = [];
         for (var i in csv) {
-            fresh_assets.push(new Asset($.extend(true, {}, csv[i])));
+            fresh_assets.push(new Asset(Util.clone(csv[i])));
         }
         var year = currentYear;
         while (GMBB(year, {budget: budget,

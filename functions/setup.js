@@ -40,7 +40,13 @@ var startYear = 1990,
 /******************
     CONFIG FUNCTION
 ******************/
-var data;
+
+// MULTI-THREADED CALCULATIONS
+var worker = new Worker('functions/worker.js');
+worker.onerror = function(e) {
+    console.log(e);
+}
+
 function config(values) {
     
     // evaluate each config option
@@ -53,9 +59,36 @@ function config(values) {
     }
 
     // load and display data
-    data = load_data(sample_data);
+    var data = load_data(sample_data);
     area_bar(data);
     sunburst(data);
+    
+    // LOAD DATA INTO WORKER THREAD
+    worker.postMessage({request: 'load_data',
+                        csv: JSON.stringify(sample_data),
+                        vars: {
+                            currentYear: currentYear,
+                            area_bar_metric: area_bar_metric+'',
+                            area_bar_comparator: area_bar_comparator+'',
+                            yearly_budget: yearly_budget
+                        }});
+    
+    $('#calculator input').off();
+    $('#calculator input').on('keyup', function(e) {
+        if (e.which === 13) {
+            var value = parseInt($(this).val());
+            var target = $(this).attr('for');
+            var func = $(this).attr('id');
+            $('#'+target).css('background-color', 'lightgray');
+            
+            // REQUEST CALCULATION FROM WORKER THREAD
+            worker.onmessage = function(e) {
+                $('#'+target).val(e.data);
+                $('#'+target).css('background-color', '');
+            };
+            worker.postMessage({request: 'calculate', func: func, value: value});
+        }
+    });
 }
 
 /******************
@@ -94,7 +127,7 @@ $('#config-form').dialog({
             .duration(ldur)
             .style("opacity", 1);
         
-        d3.selectAll('#notes, #title').transition()
+        d3.selectAll('#notes, #title, #variousthings').transition()
             .duration(ldur).style('opacity', 1);
     },
     hide: {
@@ -112,7 +145,7 @@ $('#config-toggle').on('click', function () {
 ******************/
 
 // initial hide
-d3.selectAll('#notes, #title').style('opacity', 0);
+d3.selectAll('#notes, #title, #variousthings').style('opacity', 0);
     
 // track detail tooltips
 $('#visuals').tooltip({

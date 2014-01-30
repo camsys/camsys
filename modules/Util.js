@@ -36,4 +36,11 @@ var Util = new (function() {
     this.random_integer = function (range) {
         return Math.round(Math.random()*(range[1]-range[0])+range[0]);
     };
+    
+    this.clone = function (obj1, obj2) {
+        var cloned = JSON.parse(JSON.stringify(obj1));
+        for (var i in obj2)
+            cloned[i] = obj2[i];
+        return cloned;
+    };
 })();
