@@ -42,7 +42,7 @@ Default Metrics (in functions/setup.js)
   * area_bar_metric: weights each asset LINEARLY with its PRICE and LOGARITHMICALLY with its USAGE, so expensive and highly-used (by commuters) assets are weighted the highest. Usage is currently made-up data loosely related to number of commuters served per day.
   * area_bar_comparator: sorts the yearly replacement priority queue by each asset's RATE OF DECAY, or the slope of its TERM curve at the given year; faster-decaying assets are queued higher up.
 * Sunburst
-  * sunburst_metric: arc angle is proportional to the actual amount invested in each asset at any given year (previously was the amount of investmend needed to bring each asset back into good repair).
+  * sunburst_metric: arc angle is proportional to the actual amount invested in each asset at any given year (previously was the amount of investment needed to bring each asset back into good repair).
 
 Current To-dos
 ==============
