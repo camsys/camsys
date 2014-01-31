@@ -36,6 +36,12 @@ Clicking on any segment in a layer will zoom into the segment, with itself expan
 Zooming in on a segment will also re-scale the Area Bar Chart to display percentages and investment for the selected sub-group only.  
 Clicking on the list icon in the upper right reveals a heirarchical legend. Clicking on these items corresponds to clicking on segments in the Sunburst chart.
 
+Calculator
+==========
+* Click the "Show Calculator" button to reveal.
+* Enter either field to calculate the result in the other.
+* Ex. Enter "20000000" (20 million) in the first field to get the year backlog will be cleared in the second field.
+
 Default Metrics (in functions/setup.js)
 =======================================
 * Area Bar Chart
