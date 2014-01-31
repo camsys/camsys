@@ -127,7 +127,7 @@ $('#config-form').dialog({
             .duration(ldur)
             .style("opacity", 1);
         
-        d3.selectAll('#notes, #title, #variousthings').transition()
+        d3.selectAll('#notes, #title, #titlebar').transition()
             .duration(ldur).style('opacity', 1);
     },
     hide: {
@@ -145,7 +145,7 @@ $('#config-toggle').on('click', function () {
 ******************/
 
 // buttons
-$('.btn').button();
+//$('.btn').button();
 $('#github').on('click', function() {
     window.open('https://github.com/lu16j/camsys');
 });
@@ -155,7 +155,7 @@ $('#calculator-toggle').on('click', function() {
 });
 
 // initial hide
-d3.selectAll('#notes, #title, #variousthings').style('opacity', 0);
+d3.selectAll('#notes, #title, #titlebar').style('opacity', 0);
     
 // track detail tooltips
 $('#visuals').tooltip({
