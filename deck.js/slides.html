@@ -47,8 +47,8 @@
             }
             
             .demo {
-                height: 100%;
-                width: 100%;
+                width: 1280px;
+                height: 720px;
             }
         </style>
     </head>
@@ -141,6 +141,7 @@
                             % of individual assets in good repair,<br>
                             each asset weighted by (price * commuters)
                         </li>
+                        <li>Expensive, highly-used assets are weighed the highest.</li>
                     </ul>
                 </div>
             </section>
@@ -171,9 +172,14 @@
             </section>
             
             <section class="slide">
-                <div style="height:100%">
-                    <iframe class="demo" src="http://web.mit.edu/lu16j/www/camsys/visuals.html"></iframe>
-                </div>
+                <h3>Implementation</h3>
+                <iframe class="demo" src="http://web.mit.edu/lu16j/www/camsys/visuals.html"></iframe>
+                <p>Things to try:</p>
+                <ul>
+                    <li>Lower the annual budget to 5 million to see long-term good repair stagnate.</li>
+                    <li>Unconstrain the budget and project to 2050 to see a large replacement cycle appear as an investment peak.</li>
+                    <li>Using the Calculator, determine the budget needed to clear the backlog by a 2020; then reconfigure the visualization with that budget to see backlog drop to 0% in 2020.</li>
+                </ul>
             </section>
             
             <!-- End slides. -->
