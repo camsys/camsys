@@ -91,6 +91,7 @@ body {
 
 #notes ul {
     list-style: none;
+    text-align: left;
 }
 #notes div {
     float: left;

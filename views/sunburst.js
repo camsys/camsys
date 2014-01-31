@@ -121,7 +121,7 @@ function sunburst(data) {
             .append('rect').attr('width', 10).attr('height', 10)
             .attr('fill', color_scheme[node.name]);
         child.append('text')
-            .text(' '+node.name)
+            .text(' '+node.name.replace(/[_]/,' '))
             .style('color', color_scheme[node.name]);
         for (var i in node.children) {
             if (node.children[i].children) {
@@ -138,6 +138,7 @@ function sunburst(data) {
     var legend_toggle = container.append('img')
         .attr('src', 'images/list.png')
         .attr('class', 'toggle floating')
+        .attr('title', 'Legend')
         .on('click', toggle_legend);
     
     /************************
