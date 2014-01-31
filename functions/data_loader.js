@@ -18,5 +18,10 @@ var load_data = function (csv) {
         see data/sample_data.js
     *******************************/
     
+    for (var i in csv) {
+        csv[i].years = csv[i].years.split(',');
+        csv[i].prices = csv[i].prices.split(',');
+    }
+    
     return new System(csv);
 };

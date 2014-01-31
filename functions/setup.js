@@ -59,35 +59,37 @@ function config(values) {
     }
 
     // load and display data
-    var data = load_data(sample_data);
-    area_bar(data);
-    sunburst(data);
-    
-    // LOAD DATA INTO WORKER THREAD
-    worker.postMessage({request: 'load_data',
-                        csv: JSON.stringify(sample_data),
-                        vars: {
-                            currentYear: currentYear,
-                            area_bar_metric: area_bar_metric+'',
-                            area_bar_comparator: area_bar_comparator+'',
-                            yearly_budget: yearly_budget
-                        }});
-    
-    $('#calculator input').off();
-    $('#calculator input').on('keyup', function(e) {
-        if (e.which === 13) {
-            var value = parseInt($(this).val());
-            var target = $(this).attr('for');
-            var func = $(this).attr('id');
-            $('#'+target).css('background-color', 'lightgray');
-            
-            // REQUEST CALCULATION FROM WORKER THREAD
-            worker.onmessage = function(e) {
-                $('#'+target).val(e.data);
-                $('#'+target).css('background-color', '');
-            };
-            worker.postMessage({request: 'calculate', func: func, value: value});
-        }
+    d3.csv('data/sample_data.csv', function (csv) {
+        var data = load_data(csv);
+        area_bar(data);
+        sunburst(data);
+        
+        // LOAD DATA INTO WORKER THREAD
+        worker.postMessage({request: 'load_data',
+                            csv: JSON.stringify(csv),
+                            vars: {
+                                currentYear: currentYear,
+                                area_bar_metric: area_bar_metric+'',
+                                area_bar_comparator: area_bar_comparator+'',
+                                yearly_budget: yearly_budget
+                            }});
+        
+        $('#calculator input').off();
+        $('#calculator input').on('keyup', function(e) {
+            if (e.which === 13) {
+                var value = parseInt($(this).val());
+                var target = $(this).attr('for');
+                var func = $(this).attr('id');
+                $('#'+target).css('background-color', 'lightgray');
+                
+                // REQUEST CALCULATION FROM WORKER THREAD
+                worker.onmessage = function(e) {
+                    $('#'+target).val(e.data);
+                    $('#'+target).css('background-color', '');
+                };
+                worker.postMessage({request: 'calculate', func: func, value: value});
+            }
+        });
     });
 }
 
