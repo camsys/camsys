@@ -144,6 +144,16 @@ $('#config-toggle').on('click', function () {
     DOC SETUP
 ******************/
 
+// buttons
+$('.btn').button();
+$('#github').on('click', function() {
+    window.open('https://github.com/lu16j/camsys');
+});
+$('#calculator-toggle').on('click', function() {
+    $(this).text($(this).text() === 'Show Calculator' ? 'Hide Calculator' : 'Show Calculator');
+    $('#calculator').toggleClass('hidden');
+});
+
 // initial hide
 d3.selectAll('#notes, #title, #variousthings').style('opacity', 0);
     

@@ -1,13 +1,40 @@
 body {
-    background-color: #EEEEC4;
+    background-color: #DDD;
     text-align: center;
     font-family: Century Gothic, Arial, Helvetica;
 }
 
-#calculator {
+.floating {
     position: absolute;
+}
+
+.fades {
+    transition: all 0.1s linear;
+}
+    
+.ui-tooltip-content {
+    font-family: Century Gothic, Arial, Helvetica;
+}
+
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
+
+#titlebar {
+    text-align: left;
+    height: 0;
+}
+
+#config-toggle {
     left: 1%;
-    top: 6%;
+}
+
+#github {
+    right: 1%;
+}
+
+#calculator {
+    margin: 5px 0;
     width: 35%;
     background-color: rgba(255,255,255,0.8);
     border-radius: 10px;
@@ -15,10 +42,9 @@ body {
     padding: 5px;
 }
 
-#config-toggle {
-    position: absolute;
-    left: 1%;
-    top: 1%;
+.hidden {
+    pointer-events: none;
+    opacity: 0;
 }
 
 #config-form {
@@ -51,14 +77,6 @@ body {
     display: inline-block;
 }
     
-.ui-tooltip-content {
-    font-family: Century Gothic, Arial, Helvetica;
-}
-
-.ui-dialog-titlebar-close {
-    visibility: hidden;
-}
-    
 #sunburst {
     width: 40%;
 }
@@ -73,13 +91,9 @@ body {
     opacity: 1;
 }
 
-#sunburst .floating {
-    position: absolute;
-}
-
 #sunburst .toggle {
     width: 5%;
-    left: 95%;
+    right: 0%;
 }
 
 #sunburst .toggle:hover {
@@ -87,12 +101,10 @@ body {
 }
 
 #sunburst .legend {
-    background-color: rgba(255,255,255,0.8);
+    background-color: rgba(255,255,255,0.9);
     top: 1%;
     left: 59%;
     width: 40%;
-    opacity: 0;
-    pointer-events: none;
     overflow: hidden;
     font-size: 0.8em;
     border-radius: 10px;
@@ -109,7 +121,6 @@ body {
     padding: 1%;
     width: 48%;
     float: left;
-    transition: all 0.1s linear;
     border-radius: 5px;
     overflow: hidden;
     font-weight: bold;
@@ -127,7 +138,6 @@ body {
 
 #sunburst .legend .highlighted {
     box-shadow: 0px 0px 5px #000 inset;
-    transition: all 0.1s linear;
 }
     
 #area_bar {
@@ -141,10 +151,4 @@ body {
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
-}
-
-#area_bar form {
-    position: absolute;
-    right: 10px;
-    top: 10px;
 }

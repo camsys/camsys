@@ -25,7 +25,7 @@ function sunburst(data) {
         D3 SETUP
     ************************/
     
-    var padding = 25;
+    var padding = 20;
     
     var width = jqcontainer.width(),
         height = jqcontainer.height(),
@@ -101,8 +101,8 @@ function sunburst(data) {
     
     function populate(ul, node) {
         var child = ul.append('li')
+            .attr('class', 'leaf fades')
             .classed(node.name, true)
-            .classed('leaf', true)
             .classed('root', ul.classed('root'))
             .on('mouseover', function() {
                 d3.select(this).classed('highlighted', true);
@@ -132,7 +132,7 @@ function sunburst(data) {
     }
     
     var legend = container.append('div')
-        .attr('class', 'legend floating');
+        .attr('class', 'legend floating hidden fades');
     populate(legend.append('ul').attr('class', 'root'), root);
     
     var legend_toggle = container.append('img')
@@ -193,9 +193,7 @@ function sunburst(data) {
     }
     
     function toggle_legend() {
-        legend.transition().ease('cubic-out')
-            .style('opacity', legend.style('opacity') == 0 ? 1 : 0)
-            .style('pointer-events', legend.style('opacity') == 0 ? 'auto' : 'none');
+        legend.classed('hidden', !legend.classed('hidden'));
     }
     
     function attrTween(d) {
