@@ -199,14 +199,12 @@ var System = function (csv) {
         normalize(gmbb);
         
         // clear as much investment as possible
-        // using bad-marginal-backlog queue order
+        // using bad-backlog-marginal queue order
         
         bad_queue.sort(compare);
         backlog_queue.sort(compare);
         marginal_queue.sort(compare);
-        var queue = constrained
-            ? backlog_queue.concat(marginal_queue.concat(bad_queue))
-            : backlog_queue.concat(bad_queue);
+        var queue = marginal_queue.concat(backlog_queue).concat(bad_queue);
         
         while (budget > 0 && queue.length > 0) {
             var i = queue.length-1;
@@ -269,7 +267,6 @@ var System = function (csv) {
         
         // binary search between the bounds for the lowest
         // budget that can clear the backlog in time
-        // TODO: FIND A GOOD UPPER BOUND TO AVOID INFINITE LOOP
         highGuess *= 2;
         while (e > 1 || middleYear > year) {
             middleGuess = (lowGuess+highGuess)/2;
