@@ -124,7 +124,7 @@ var System = function (csv) {
      */
     function GMBB(year, options) {
         var budget = options.budget || Infinity;
-        var constrained = budget < Infinity;
+        var constrained = budget !== Infinity;
         var metric = options.metric || 1;
         var comparator = options.comparator || function () { return 0; };
         var assets = options.assets || original_assets;
@@ -206,7 +206,7 @@ var System = function (csv) {
         marginal_queue.sort(compare);
         var queue = constrained
             ? backlog_queue.concat(marginal_queue.concat(bad_queue))
-            : backlog_queue;
+            : backlog_queue.concat(bad_queue);
         
         while (budget > 0 && queue.length > 0) {
             var i = queue.length-1;
@@ -261,11 +261,16 @@ var System = function (csv) {
         var middleGuess, middleYear;
         var e = 1000;
         
+        if (year < currentYear)
+            return Infinity;
+        
         if (year === currentYear)
-            return highGuess;
+            return Math.ceil(highGuess);
         
         // binary search between the bounds for the lowest
         // budget that can clear the backlog in time
+        // TODO: FIND A GOOD UPPER BOUND TO AVOID INFINITE LOOP
+        highGuess *= 2;
         while (e > 1 || middleYear > year) {
             middleGuess = (lowGuess+highGuess)/2;
             middleYear = this.year_to_clear_with(middleGuess);
