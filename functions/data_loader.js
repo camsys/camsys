@@ -18,10 +18,12 @@ var load_data = function (csv) {
         see data/sample_data.js
     *******************************/
     
-    for (var i in csv) {
-        csv[i].years = csv[i].years.split(',');
-        csv[i].prices = csv[i].prices.split(',');
+    var assets = Util.clone(csv);
+    
+    for (var i in assets) {
+        assets[i].years = assets[i].years.split(',');
+        assets[i].prices = assets[i].prices.split(',');
     }
     
-    return new System(csv);
+    return new System(assets);
 };
